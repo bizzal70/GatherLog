@@ -9,10 +9,10 @@ This repository was started on 2026-10-13 as a clean copy for publishing. The ea
 - **No local `.git`.** GitHub holds all history. Publish with `tools\Publish.ps1 -Message "..."`, which uses a throwaway temp clone and runs the tests first.
 - **Layout:** the addon's own files (`GatherTrail.toc`, the Lua files, `Kinds\`) sit at the top of the project, because that is what the release packager expects. `tests/`, `tools/` and `.github/` are development-only and are left out of the released zip by `.pkgmeta`.
 - **Testing in game:** `tools\Link-Addon.ps1` junctions this folder into the client's `Interface\AddOns` as `GatherTrail`. Edits are live after `/reload`; a new file or a TOC change needs a full client restart.
-- **Client install:** `C:\Program Files (x86)\World of Warcraft\_classic_beta_\` (`WowB.exe`). Expect a different flavor folder after launch (reported for 2026-11-04); pass `-Flavor` to the link script then.
+- **Client install:** `C:\Program Files (x86)\World of Warcraft\_forever_\` (`Wow.exe`, product `wowf`), the live client since launch (4 November 2026). The beta folder `_classic_beta_` was removed on 2026-11-02, and its saved data went with it.
 - **Tests:** `python tests/run.py` runs the addon in real Lua 5.1 (the `lupa` pip package) against a fake WoW API in `tests/wow_stub.lua`, loading the files the TOC lists, so a file left out of the TOC fails the tests. They run before every publish and again on GitHub. They prove the addon's own logic only; whether the real client behaves like the stub can only be checked in game.
 - **Releases:** a tag starting with `v` runs `.github/workflows/release.yml`, which uses the BigWigs packager; a tag containing `beta` is released as a beta. CurseForge and Wago uploads are skipped until their project IDs are in the TOC and their tokens are in the repository secrets.
-- **Evidence from the game:** the user's saved data is at `C:\Program Files (x86)\World of Warcraft\_classic_beta_\WTF\Account\<account>\SavedVariables\GatherTrail.lua`. Read it before claiming what has or has not worked in game. The game writes it only on logout or `/reload`, and rescans addons at character select, so neither a missing file nor the game's start time proves an addon is not loaded.
+- **Evidence from the game:** the user's saved data is at `C:\Program Files (x86)\World of Warcraft\_forever_\WTF\Account\<account>\SavedVariables\GatherTrail.lua`. Read it before claiming what has or has not worked in game. The game writes it only on logout or `/reload`, and rescans addons at character select, so neither a missing file nor the game's start time proves an addon is not loaded.
 
 ## Proven in game, and not
 
@@ -54,7 +54,7 @@ Not yet seen working in game: fishing pools, rare creatures (and whether Forever
 
 Everything below, unless marked verified, comes from community sources during the beta (Warcraft Wiki, GitHub ports, fan guides), not from Blizzard docs. Builds change. Verify in game before relying on any of it.
 
-- Local client was 1.60.1.70338 on 2026-10-11 (read from `WowB.exe`).
+- Local client was 1.60.1.70338 on 2026-10-11 (beta, `WowB.exe`); the live client is 1.60.1.70707 (2026-10-30, `_forever_\Wow.exe`). The TOC interface number for live is not yet confirmed; check `select(4, GetBuildInfo())` in game.
 - TOC: `## Interface: 16001` (verified in game on build 70338).
 - TOC flavor suffix is `_Forever.toc` or `_Camelot.toc`. The TOC `[Game]` variable expands to `Camelot`. Game type for `AllowLoadGameType` is `forever` / `camelot`.
 - The client is Retail-based: Midnight 12.x API and UI architecture, not the Classic API. Port from Retail code.
