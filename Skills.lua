@@ -40,6 +40,47 @@ function ns.GetSkill(profession)
     end
 end
 
+-- Whether this character has the profession that gathers a kind, for
+-- deciding which pins to show. Kinds without a profession (chests, rares)
+-- always count as known. Asked many times a second while the maps redraw,
+-- so the answer is kept for a couple of seconds, and dropped at once when
+-- the character learns or unlearns a profession.
+local knownCache, knownCacheTime = {}, nil
+function ns.ForgetProfessions()
+    knownCache, knownCacheTime = {}, nil
+end
+
+function ns.HasProfession(kind)
+    local info = ns.KINDS[kind]
+    if not info or not info.skill then return true end
+    -- A client that cannot say hides nothing.
+    if not GetProfessions or not GetProfessionInfo then return true end
+    local now = GetTime()
+    if not knownCacheTime or now - knownCacheTime > 2 then
+        knownCache, knownCacheTime = {}, now
+    end
+    local known = knownCache[kind]
+    if known == nil then
+        known = ns.GetSkill(kind) ~= nil
+        knownCache[kind] = known
+    end
+    return known
+end
+
+do
+    local watcher = CreateFrame("Frame")
+    for _, event in ipairs({ "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_SKILL_LINE", "PLAYER_ENTERING_WORLD" }) do
+        pcall(watcher.RegisterEvent, watcher, event)
+    end
+    watcher:SetScript("OnEvent", function()
+        ns.ForgetProfessions()
+        if ns.db then
+            ns.RefreshPins()
+            ns.RefreshMinimapPins()
+        end
+    end)
+end
+
 local function Info(name)
     local info = ns.db.skills[name]
     if not info then

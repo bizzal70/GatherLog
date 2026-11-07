@@ -77,6 +77,7 @@ local defaults = {
     showPins = true,
     showMinimapPins = true,
     hidePins = false,   -- the one-click declutter; leaves the settings above alone
+    onlyMyProfessions = true,   -- pins only for kinds this character can gather
     minimapDetect = true,
     -- Minutes a gathered node is left out of routes; 0 turns that off.
     skipRecentMinutes = 10,
@@ -220,11 +221,17 @@ function ns.RebuildKnownNames()
     end
 end
 
--- Whether the maps should draw this node, going by its kind and by the
--- hide-all-pins switch. Stops on a route being followed are drawn anyway.
+-- Whether the maps should draw this node, going by its kind, by the
+-- hide-all-pins switch, and (by default) by whether this character has the
+-- profession for it. Stops on a route being followed are drawn anyway.
+-- None of this affects recording: every character records every node it
+-- sees or clicks, for the whole account.
 function ns.IsKindShown(node)
     if ns.db.hidePins then return false end
-    return ns.db.showKinds[ns.NodeProfession(node)] ~= false
+    local kind = ns.NodeProfession(node)
+    if ns.db.showKinds[kind] == false then return false end
+    if ns.db.onlyMyProfessions and not ns.HasProfession(kind) then return false end
+    return true
 end
 
 -- Hides every pin on both maps at once, or brings them back as they were.
@@ -470,6 +477,7 @@ local function PrintHelp()
     ns.Print("/gt travel clear - forget recorded transports (boats and the like)")
     ns.Print("/gt show [kind] - show or hide one kind of pin: ore, herb, fish, skin, chest, rare")
     ns.Print("/gt hide - hide all pins on both maps, or show them again")
+    ns.Print("/gt mine - show pins only for this character's professions, or for everything")
     ns.Print("/gt pins - show or hide nodes on the world map")
     ns.Print("/gt minimap - show or hide nodes on the minimap")
     ns.Print("/gt detect - record nodes you point at on the minimap, on or off")
@@ -518,6 +526,13 @@ SlashCmdList.GATHERTRAIL = function(msg)
         end
     elseif command == "hide" then
         ns.TogglePins()
+    elseif command == "mine" then
+        ns.db.onlyMyProfessions = not ns.db.onlyMyProfessions
+        ns.RefreshPins()
+        ns.RefreshMinimapPins()
+        ns.Print(ns.db.onlyMyProfessions
+            and "Showing pins only for this character's professions (chests and rares always). Nodes are still recorded for all."
+            or "Showing pins for every profession.")
     elseif command == "pins" then
         ns.db.showPins = not ns.db.showPins
         ns.RefreshPins()

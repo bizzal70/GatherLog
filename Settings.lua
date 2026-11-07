@@ -229,6 +229,8 @@ local function CreatePanel(window, topOffset)
         function() return ns.db.showPins end, function(v) ns.db.showPins = v end), left)
     Place(CreateCheckbox(panel, "Pins on the minimap",
         function() return ns.db.showMinimapPins end, function(v) ns.db.showMinimapPins = v end), left)
+    Place(CreateCheckbox(panel, "Only my professions' nodes",
+        function() return ns.db.onlyMyProfessions end, function(v) ns.db.onlyMyProfessions = v end), left)
     y = y - 8
     for _, kind in ipairs(ns.KindList()) do
         local key = kind.key
@@ -238,7 +240,7 @@ local function CreatePanel(window, topOffset)
     end
     local routeNote = UI.Label(panel, "GameFontDisableSmall")
     routeNote:SetPoint("TOPLEFT", left, y - 4)
-    routeNote:SetText("Stops on the route you are following are always shown.")
+    routeNote:SetText("Stops on the route you are following are always shown.\nEvery character still records every node it sees.")
 
     local versionNote = UI.Label(panel, "GameFontDisableSmall")
     versionNote:SetPoint("BOTTOMLEFT", left, 14)

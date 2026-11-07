@@ -1,5 +1,10 @@
 # GatherTrail
 
+## 0.20.0
+
+- Each character now sees pins only for the professions it has: ore for miners, herbs for herbalists, fishing pools for fishers, skinning spots for skinners. Chests and rares are shown to everyone, and the stops of a route you are following always show. Turn it off with the new "Only my professions' nodes" option or `/gt mine`.
+- Nothing changes in what is recorded: every character still records every node it sees, points at or clicks, profession or not, and the whole account shares it. A miner logging in sees the ore your herbalist rode past.
+
 ## 0.19.0
 
 - Hide all pins in one click, to declutter the maps: the new **Hide pins** button in the window's header, right-click on the minimap button, `/gt hide`, or a key binding (Key Bindings, AddOns, GatherTrail). Every node pin and travel marker goes from both the world map and the minimap; the same click brings them back exactly as they were. Stops on a route you are following stay visible. The minimap button's icon turns grey while pins are hidden.

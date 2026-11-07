@@ -25,6 +25,10 @@ check(#ns.db.nodes[77] == 0 and ns.ClassifyNodeName("Lodestone") == nil, "a Lode
 check(ns.ClassifyNodeName("Small Thorium Vein") == "ore" and ns.ClassifyNodeName("Mithril Deposit") == "ore" and ns.ClassifyNodeName("Whirlpool") == nil and ns.ClassifyNodeName("Oil Spill") == "fish", "node names are matched on whole words")
 ns.db.nodes[2521] = nil
 check(ns.db.skipRecentMinutes == 10, "new settings get their defaults")
+check(ns.db.onlyMyProfessions == true, "pins are limited to this character's professions by default")
+-- The tests below draw pins for a character with no professions, so they
+-- run with the limit off; it has its own tests further down.
+ns.db.onlyMyProfessions = false
 check(ns.db.version == ns.DATA_VERSION and ns.DATA_VERSION >= 2, "saved data from before version numbers is brought up to the current layout")
 do
     local lodestone = { x = 0.5, y = 0.5, count = 0, seen = 1, names = { Lodestone = 1 } }
@@ -719,6 +723,63 @@ check(not ns.db.hidePins and pinsButton.label.__text == "Hide pins" and ShownNod
 SlashCmdList.GATHERTRAIL("")
 WorldMapFrame.__shown = false
 
+-- pins only for this character's professions -----------------------------------
+ON_TAXI = true; P.map, P.x, P.y = 41, 0.5, 0.5; tick(); ON_TAXI = false
+NOW = NOW + 100
+for kind, name in pairs({ ore = "Copper Vein", herb = "Peacebloom", fish = "Floating Wreckage", skin = "Light Leather", chest = "Battered Chest" }) do
+    P.x = P.x + 0.05
+    SlashCmdList.GATHERTRAIL("add " .. kind .. " " .. name)
+end
+P.x = 0.5
+local function ShownKinds()
+    local kinds = {}
+    for _, f in ipairs(Frames()) do
+        local node = rawget(f, "node")
+        if node and f.__shown then kinds[ns.NodeProfession(node)] = true end
+    end
+    return kinds
+end
+local function Redraw() ns.ForgetProfessions(); ns.RefreshPins(); ns.RefreshMinimapPins() end
+WorldMapFrame.__shown = true
+Redraw()
+local all = ShownKinds()
+check(all.ore and all.herb and all.fish and all.skin and all.chest, "with the limit off every kind has pins")
+SKILLS = {}
+SlashCmdList.GATHERTRAIL("mine")
+Redraw()
+local none = ShownKinds()
+check(ns.db.onlyMyProfessions and not none.ore and not none.herb and not none.fish and not none.skin,
+    "a character without professions sees no ore, herb, fishing or skinning pins")
+check(none.chest, "chests are shown to everyone")
+SKILLS[182] = 1
+Redraw()
+local herbalist = ShownKinds()
+check(herbalist.herb and not herbalist.ore and herbalist.chest, "learning Herbalism shows herb pins, and still no ore")
+-- that herbalist still records ore it walks past, for the miners on the account
+GameTooltip.GetOwner = function() return nil end
+GameTooltip.__shown = true; GameTooltipTextLeft1.__text = "Tin Vein"; GameTooltipTextLeft2.__shown = true; GameTooltipTextLeft2.__text = "Requires Mining"
+P.x = 0.9; NOW = NOW + 10
+GameTooltip.__scripts.OnShow(GameTooltip)
+GameTooltip.__shown = false; GameTooltipTextLeft2.__shown = false
+local tinSeen
+for _, node in ipairs(ns.db.nodes[41]) do if ns.NodeName(node) == "Tin Vein" then tinSeen = node end end
+check(tinSeen and tinSeen.seen == 1, "a character without Mining still records the ore it points at, though it is not shown")
+SKILLS[186] = 1
+Redraw()
+check(ShownKinds().ore, "a miner on the account sees it")
+SKILLS[186] = nil
+-- a route still shows its stops
+SKILLS = {}
+SlashCmdList.GATHERTRAIL("route")
+Redraw()
+check(ShownKinds().ore, "the stops of a route being followed are shown even without the profession")
+SlashCmdList.GATHERTRAIL("stop")
+SlashCmdList.GATHERTRAIL("mine")
+Redraw()
+check(not ns.db.onlyMyProfessions and ShownKinds().ore, "/gt mine turns the limit off again")
+WorldMapFrame.__shown = false
+SKILLS = {}
+
 -- 3. options page ------------------------------------------------------------
 if not GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end
 local toggles = 0
@@ -728,7 +789,7 @@ for _, f in ipairs(Frames()) do
         f.__scripts.OnClick(f, "LeftButton"); f.__scripts.OnClick(f, "LeftButton"); toggles = toggles + 1
     end
 end
-check(toggles == 11, "every options checkbox toggles and toggles back (" .. toggles .. ")")
+check(toggles == 12, "every options checkbox toggles and toggles back (" .. toggles .. ")")
 check(ns.db.showPins and ns.db.showMinimapPins and ns.db.beacon and ns.db.sound and ns.db.minimapDetect and ns.db.showKinds.rare, "options are back where they started")
 -- every button on the page and in the export dialog
 local pressed = 0
