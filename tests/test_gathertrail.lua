@@ -756,6 +756,36 @@ check(ns.ClassifyNodeName("Wilted Peacebloom") == "herb" and ns.ClassifyNodeName
     "Forever's low-level herbs are known by the classic name inside theirs")
 check(ns.ClassifyNodeName("Peacebloomer") == nil and ns.ClassifyNodeName("Mailbox") == nil, "a name only containing part of a herb's word is not a herb")
 
+-- Every classic gathering node is recognised by its name alone, which is
+-- all the minimap and the interact highlight give.
+local everyNode = {
+    ore = { "Copper Vein", "Tin Vein", "Silver Vein", "Iron Deposit", "Gold Vein", "Mithril Deposit",
+        "Truesilver Deposit", "Dark Iron Deposit", "Small Thorium Vein", "Rich Thorium Vein",
+        "Incendicite Mineral Vein", "Lesser Bloodstone Deposit", "Indurium Mineral Vein",
+        "Ooze Covered Silver Vein", "Ooze Covered Gold Vein", "Ooze Covered Mithril Deposit",
+        "Ooze Covered Truesilver Deposit", "Ooze Covered Thorium Vein", "Ooze Covered Rich Thorium Vein" },
+    herb = { "Peacebloom", "Silverleaf", "Earthroot", "Mageroyal", "Briarthorn", "Stranglekelp", "Bruiseweed",
+        "Wild Steelbloom", "Grave Moss", "Kingsblood", "Liferoot", "Fadeleaf", "Goldthorn", "Khadgar's Whisker",
+        "Wintersbite", "Firebloom", "Purple Lotus", "Arthas' Tears", "Sungrass", "Blindweed", "Ghost Mushroom",
+        "Gromsblood", "Golden Sansam", "Dreamfoil", "Mountain Silversage", "Plaguebloom", "Icecap", "Black Lotus",
+        "Wilted Peacebloom", "Stunted Silverleaf" },
+    fish = { "Floating Wreckage", "Oily Blackmouth School", "Lesser Oily Blackmouth School", "Firefin Snapper School",
+        "Lesser Firefin Snapper School", "Sagefish School", "Lesser Sagefish School", "Greater Sagefish School",
+        "School of Deviate Fish", "Stonescale Eel Swarm", "Patch of Elemental Water", "Floating Debris",
+        "Schooner Wreckage", "Waterlogged Wreckage", "Bloodsail Wreckage", "Mixed Ocean School" },
+    chest = { "Battered Chest", "Tattered Chest", "Solid Chest", "Large Battered Chest", "Large Solid Chest",
+        "Large Iron Bound Chest", "Large Mithril Bound Chest", "Mithril Bound Trunk", "Giant Clam", "Practice Lockbox",
+        "Battered Footlocker", "Dented Footlocker", "Mossy Footlocker", "Scarlet Footlocker" },
+}
+local misread = {}
+for kind, names in pairs(everyNode) do
+    for _, name in ipairs(names) do
+        local got = ns.ClassifyNodeName(name)
+        if got ~= kind then misread[#misread + 1] = ("%s -> %s"):format(name, tostring(got)) end
+    end
+end
+check(#misread == 0, "every classic ore, herb, fishing pool and chest is known by name: " .. table.concat(misread, "; "))
+
 -- the interact highlight, with no cursor on the node
 P.x = 0.8; NOW = NOW + 1
 UNITS.softinteract = { name = "Wilted Peacebloom", guid = "GameObject-0-1-2-3" }

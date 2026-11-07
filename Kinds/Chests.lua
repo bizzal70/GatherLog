@@ -20,7 +20,7 @@ ns.RegisterKind({
 
     casts = { "Opening" },
     spellIDs = { 3365 },
-    nameWords = { "Chest", "Lockbox", "Footlocker", "Strongbox", "Coffer", "Cache", "Trunk", "Treasure" },
+    nameWords = { "Chest", "Lockbox", "Footlocker", "Strongbox", "Coffer", "Cache", "Trunk", "Treasure", "Giant Clam" },
 
     ResolveTarget = function(self, targetName)
         if targetName and ns.NameFits(self, targetName) then

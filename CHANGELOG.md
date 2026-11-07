@@ -1,5 +1,9 @@
 # GatherTrail
 
+## 0.18.2
+
+- Every classic gathering node is now known by name: added Patch of Elemental Water (fishing) and Giant Clam (chests). All ores, herbs, fishing pools and chests from the original game are checked by the tests.
+
 ## 0.18.1
 
 (0.18.0 was a packaging mistake: it held the same files as 0.17.3. This is the release it should have been.)
