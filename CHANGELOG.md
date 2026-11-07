@@ -1,5 +1,10 @@
 # GatherTrail
 
+## 0.17.3
+
+- Pointing at nodes on the minimap is more reliable. Moving the cursor straight from one node to another of the same name (Peacebloom to Peacebloom) used to record only the first, because the game keeps the tooltip up with the same text the whole way; and a second node of the same name was ignored for 5 seconds. Each node is now judged by where it is, so every one is recorded, and resting on one still records it only once.
+- The minimap tooltip is now checked every frame instead of ten times a second, so a quick sweep across a node is not missed.
+
 ## 0.17.2
 
 - First release on CurseForge. No changes to the addon itself.

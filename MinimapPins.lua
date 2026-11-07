@@ -161,8 +161,29 @@ local function CleanName(text)
     return (text:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
-local lastBlip, lastBlipTime = nil, 0
--- The tooltip text last looked at, so each new tooltip is handled once.
+-- The game re-sets the minimap tooltip every frame while the cursor is on
+-- the minimap, so it stays up, with the same text, as the cursor slides
+-- from one Peacebloom to the next. Whether a blip is new is therefore
+-- decided by place, not by the text changing: a name is recorded unless
+-- the same name was just recorded close to where the cursor now points.
+ns.BLIP_SAME_YARDS = 20     -- a blip is a few pixels wide; this covers resting on one
+ns.BLIP_MEMORY_SECONDS = 60
+local recentBlips = {}      -- { name =, mapID =, x =, y =, time = }
+
+local function RecentlyRecorded(name, mapID, x, y, now)
+    for index = #recentBlips, 1, -1 do
+        local blip = recentBlips[index]
+        if now - blip.time > ns.BLIP_MEMORY_SECONDS then
+            table.remove(recentBlips, index)
+        elseif blip.name == name and blip.mapID == mapID
+            and ns.Distance(mapID, x, y, blip.x, blip.y) <= ns.BLIP_SAME_YARDS then
+            return true
+        end
+    end
+    return false
+end
+
+-- The tooltip text last looked at, so debug mode reports each text once.
 -- false means the text was there but the client would not let it be read.
 local lastText
 
@@ -187,25 +208,30 @@ local function CheckMinimapTooltip()
         lastText = text ~= nil and false or nil
         return
     end
-    if text == lastText then return end
+    local newText = text ~= lastText
     lastText = text
 
     local east, north = CursorOffsetYards()
     if not east then return end
+    local mapID, px, py = ns.GetPlayerPosition()
+    if not mapID then return end
+    local width, height = ns.GetMapSize(mapID)
+    -- Where the cursor points, on the zone map (map y grows south).
+    local x, y = px + east / width, py - north / height
+    local now = GetTime()
 
     -- Several blips under the cursor are listed one per line.
     for line in text:gmatch("[^\n]+") do
         local name = CleanName(line)
         local profession = name ~= "" and ns.ClassifyNodeName(name)
-        if ns.db.debug and name ~= "" then
+        if ns.db.debug and name ~= "" and newText then
             ns.Print(("minimap tooltip: \"%s\" is %s"):format(name, profession or "not a node name I know"))
         end
-        local now = GetTime()
-        if profession and not (name == lastBlip and now - lastBlipTime < 5) then
-            lastBlip, lastBlipTime = name, now
+        if profession and not RecentlyRecorded(name, mapID, x, y, now) then
+            recentBlips[#recentBlips + 1] = { name = name, mapID = mapID, x = x, y = y, time = now }
             -- A minimap pixel is a few yards wide, so the place is close
             -- but not exact; gathering the node later pins it down.
-            ns.RecordNode(name, "seen", true, profession, { east = east, north = north })
+            ns.RecordNode(name, "seen", true, profession, { x = x, y = y })
         end
     end
 end
@@ -215,10 +241,13 @@ ns.CheckMinimapTooltip = CheckMinimapTooltip
 local elapsedTotal = 0
 ns.onLogin[#ns.onLogin + 1] = function()
     holder:SetScript("OnUpdate", function(_, elapsed)
+        -- The tooltip is looked at every frame, so sweeping the cursor
+        -- quickly across a blip still catches it; the pins are redrawn
+        -- ten times a second.
+        CheckMinimapTooltip()
         elapsedTotal = elapsedTotal + elapsed
         if elapsedTotal < 0.1 then return end
         elapsedTotal = 0
-        CheckMinimapTooltip()
         Update()
     end)
 end

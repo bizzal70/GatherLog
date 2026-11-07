@@ -74,7 +74,8 @@ print = function(m) printed[#printed + 1] = m end
 issecretvalue = function() return false end
 IN_COMBAT = false
 InCombatLockdown = function() return IN_COMBAT end
-GetCursorPosition = function() return 150, 120 end
+CURSOR_X, CURSOR_Y = 150, 120
+GetCursorPosition = function() return CURSOR_X, CURSOR_Y end
 GetPlayerFacing = function() return player.facing end
 UnitLevel = function(unit) if unit ~= "player" and UNITS and UNITS[unit] then return UNITS[unit].level end return 22 end
 UnitFactionGroup = function() return "Alliance" end

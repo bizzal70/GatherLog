@@ -472,10 +472,36 @@ check(herbBlips == 1 and #blips == 3, "a herb blip on the minimap is recorded as
 check(ns.ClassifyNodeName("khadgar's whisker") == "herb" and ns.ClassifyNodeName("Black Lotus") == "herb",
     "herb names are matched whatever their capitals")
 check(ns.ClassifyNodeName("Lotus Pond") == nil and ns.ClassifyNodeName("Stormwind Guard") == nil, "a name only partly like a herb's is not a herb")
+-- Sliding the cursor from one herb to another of the same kind: the game
+-- keeps the tooltip up with the same text the whole way (it re-sets it every
+-- frame), and each herb must still be recorded. This was missed on live.
+NOW = NOW + 10; CURSOR_Y = 40; GameTooltipTextLeft1.__text = "Briarthorn"   -- somewhere with no node yet
+ns.CheckMinimapTooltip()
+local function CountNamed(name)
+    local count = 0
+    for _, node in ipairs(blips) do if ns.NodeName(node) == name then count = count + 1 end end
+    return count
+end
+check(CountNamed("Briarthorn") == 1, "a Briarthorn blip is recorded")
+local firstBriar
+for _, node in ipairs(blips) do if ns.NodeName(node) == "Briarthorn" then firstBriar = node end end
+local seenBefore = firstBriar.seen
+CURSOR_X = 152; NOW = NOW + 0.1; ns.CheckMinimapTooltip()
+CURSOR_X = 149; NOW = NOW + 0.1; ns.CheckMinimapTooltip()
+check(CountNamed("Briarthorn") == 1 and firstBriar.seen == seenBefore, "resting on one blip, with the cursor wobbling a little, records it once")
+CURSOR_X = 60; NOW = NOW + 0.5; ns.CheckMinimapTooltip()   -- about 130 yards west, same text, tooltip never hidden
+check(CountNamed("Briarthorn") == 2, "sliding straight on to a second Briarthorn records the second one too")
+CURSOR_X = 105; NOW = NOW + 0.5; ns.CheckMinimapTooltip()   -- and a third, between them
+check(CountNamed("Briarthorn") == 3, "and a third in a row")
+CURSOR_X = 150; NOW = NOW + 0.5; ns.CheckMinimapTooltip()   -- back to the first
+check(CountNamed("Briarthorn") == 3 and firstBriar.seen == seenBefore, "going back over a blip just recorded does not count it again")
+NOW = NOW + 61; CURSOR_X = 151; ns.CheckMinimapTooltip()
+check(CountNamed("Briarthorn") == 3 and firstBriar.seen == seenBefore, "a minute later it is still the same node, and sightings still count once per 10 minutes")
+CURSOR_X, CURSOR_Y = 150, 120
 -- our own minimap pin's tooltip names a node, and must not be read back in
 NOW = NOW + 10; owner = { minimapPin = true }; GameTooltipTextLeft1.__text = "Silver Vein"
 ns.CheckMinimapTooltip()
-check(#blips == 3, "the addon's own pin tooltips are not recorded as blips")
+check(#blips == 6, "the addon's own pin tooltips are not recorded as blips")
 owner = nil; GameTooltip.__shown = false; MOUSE_OVER_MINIMAP = false
 
 -- treasure chests ---------------------------------------------------------
