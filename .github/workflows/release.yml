@@ -6,7 +6,7 @@ name: Release
 #
 # The uploads need two things that are not here yet:
 #   * the project IDs in GatherTrail.toc (X-Curse-Project-ID, X-Wago-ID)
-#   * the upload tokens as repository secrets (CF_API_KEY, WAGO_API_TOKEN)
+#   * the upload tokens as repository secrets (CF_API_KEY or CF_KEY, WAGO_API_TOKEN)
 # Until both are in place for a site, that site is simply skipped.
 on:
   push:
@@ -31,6 +31,6 @@ jobs:
       - name: Package and upload
         uses: BigWigsMods/packager@v2
         env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          CF_API_KEY: ${{ secrets.CF_API_KEY || secrets.CF_KEY }}
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}

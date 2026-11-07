@@ -2,8 +2,6 @@
 
 Remembers where your characters find things, works out the best place to go for more, and guides you there. An addon for World of Warcraft: Forever (client 1.60.x).
 
-**This is a beta.** See "What is and is not proven" below.
-
 ## What it tracks
 
 | | Recorded when you |
@@ -73,7 +71,7 @@ If one of these does not work for you, `/gt debug` prints what the game reports,
 
 - **English only.** Fishing pools, chests and ore blips on the minimap are recognised by English words in their names.
 - **Routes are straight lines.** The addon knows where things are, not what is in the way.
-- **Minimap blips are not read automatically.** The game does not tell addons where its tracking blips are, so you have to point at one for it to be recorded.
+- **Minimap blips are not read automatically.** The game does not tell addons where its tracking blips are, so you have to point at one for it to be recorded. Herbs are recognised by name (the classic herbs are built in; a herb new to Forever is learned the first time you pick it).
 - **Combat.** The game restricts what addons may read during combat; a record that cannot be made is skipped.
 - **Square minimaps** are not supported; pins assume a round one.
 
@@ -91,11 +89,11 @@ Other small addons for World of Warcraft: Forever, all free:
 - **[AltBoard](https://github.com/bizzal70/AltBoard)** shows all your characters at a glance: level, gold, rested and where you left them.
 - **[SwiftQuest](https://github.com/bizzal70/SwiftQuest)** accepts quests and hands them in as soon as you talk to the quest giver, without ever choosing a reward for you.
 - **[SessionRecap](https://github.com/bizzal70/SessionRecap)** keeps a running tally of your play session: gold, experience per hour, quests, gathering and loot.
-- **[MacroKit](https://github.com/bizzal70/MacroKit)** adds ready-made macros for your class and spec (Paladin so far) and never overwrites your own.
+- **[MacroKit](https://github.com/bizzal70/MacroKit)** adds ready-made macros for your class and spec, for all nine classes, and never overwrites your own.
 
 ## Installing
 
-Copy this folder into `World of Warcraft\_forever_\Interface\AddOns\` as `GatherTrail`, restart the game, and enable GatherTrail on the character select screen.
+Install it from [CurseForge](https://www.curseforge.com/wow/addons/gathertrail) (once approved) with the CurseForge app, or by hand: copy this folder into `World of Warcraft\_forever_\Interface\AddOns\` as `GatherTrail`, restart the game, and enable GatherTrail on the character select screen.
 
 ## Developing
 
@@ -111,7 +109,9 @@ To also upload to CurseForge and Wago, two things are needed once:
 
 1. Create the project on each site, then add its ID to `GatherTrail.toc`:
    `## X-Curse-Project-ID: 123456` and `## X-Wago-ID: abc123`.
-2. Create an upload token on each site and add it to this repository's secrets (Settings, Secrets and variables, Actions) as `CF_API_KEY` and `WAGO_API_TOKEN`.
+2. Create an upload token on each site and add it to this repository's secrets (Settings, Secrets and variables, Actions) as `CF_API_KEY` (or `CF_KEY`) and `WAGO_API_TOKEN`.
+
+CurseForge is set up (project 1790426); Wago is not.
 
 Before each release: raise `## Version:` in `GatherTrail.toc` and add the version to `CHANGELOG.md`.
 
