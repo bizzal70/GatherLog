@@ -13,7 +13,7 @@ Remembers where your characters find things, works out the best place to go for 
 | **Treasure chests** | open one, or point at one |
 | **Rare creatures** | see one, kill and loot one, or the game marks one on the minimap |
 
-Every character on your account adds to the same history, including characters that cannot gather: pointing at a vein with a character who has no Mining still records it.
+Every character on your account adds to the same history, including characters that cannot gather: pointing at a vein with a character who has no Mining still records it, and so does walking up to one when the game highlights it for the interact key. Everything recorded is shared with all your characters (the game saves it when you log out or `/reload`).
 
 ## Using it
 

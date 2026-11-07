@@ -20,9 +20,10 @@ local _, ns = ...
 --                    profession ("Mining"); optional
 --   nameWords        whole words that mark a bare name as this kind of
 --                    node ("Vein"); English only; optional
---   names            whole names that are this kind of node, for kinds
---                    whose names share no word (herbs); any capitals;
---                    English only; optional
+--   names            names that are this kind of node, for kinds whose
+--                    names share no word (herbs); matched as whole words,
+--                    so "Wilted Peacebloom" fits "Peacebloom"; any
+--                    capitals; English only; optional
 -- and, optionally, three functions for kinds that do not fit the pattern:
 --   ResolveTarget(self, targetName)  the name to record for a cast, or nil
 --                                    to ignore the cast
@@ -65,22 +66,54 @@ function ns.HasWord(name, word)
 end
 
 -- Whether a name belongs to a gatherer: it contains one of its nameWords
--- ("Copper Vein" has "Vein"), or is one of its exact names (herbs share no
--- word, so they are listed whole). Exact names ignore case.
-local exactNames = {}   -- gatherer -> { lowercased name = true }
+-- ("Copper Vein" has "Vein"), or one of its names as whole words (herbs
+-- share no word, so they are listed whole; Forever also has low-level
+-- versions such as "Wilted Peacebloom" and "Stunted Silverleaf", which
+-- contain the classic name). Names ignore case.
+local namePatterns = {}   -- gatherer -> list of lowercased, escaped names
 function ns.NameFits(gatherer, name)
+    if type(name) ~= "string" then return false end
     for _, word in ipairs(gatherer.nameWords or {}) do
         if ns.HasWord(name, word) then return true end
     end
     if gatherer.names then
-        local set = exactNames[gatherer]
-        if not set then
-            set = {}
-            for _, known in ipairs(gatherer.names) do set[known:lower()] = true end
-            exactNames[gatherer] = set
+        local patterns = namePatterns[gatherer]
+        if not patterns then
+            patterns = {}
+            for _, known in ipairs(gatherer.names) do
+                patterns[#patterns + 1] = known:lower():gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%0")
+            end
+            namePatterns[gatherer] = patterns
         end
-        if type(name) == "string" and set[name:lower()] then return true end
+        local lowered = name:lower()
+        for _, pattern in ipairs(patterns) do
+            if ns.HasWord(lowered, pattern) then return true end
+        end
     end
+    return false
+end
+
+-- Sightings come in many times a second while the cursor rests on a node,
+-- or while a node stays highlighted. One is passed on unless the same name
+-- was noted close by within the last minute. Judging by place, not by the
+-- name alone, means riding past several Copper Veins records every one.
+ns.SAME_SIGHTING_YARDS = 20
+ns.SIGHTING_MEMORY_SECONDS = 60
+local recentSightings = {}   -- { name =, mapID =, x =, y =, time = }
+
+-- Whether this sighting was just noted; if not, it is noted now.
+function ns.NotedRecently(name, mapID, x, y)
+    local now = GetTime()
+    for index = #recentSightings, 1, -1 do
+        local seen = recentSightings[index]
+        if now - seen.time > ns.SIGHTING_MEMORY_SECONDS then
+            table.remove(recentSightings, index)
+        elseif seen.name == name and seen.mapID == mapID
+            and ns.Distance(mapID, x, y, seen.x, seen.y) <= ns.SAME_SIGHTING_YARDS then
+            return true
+        end
+    end
+    recentSightings[#recentSightings + 1] = { name = name, mapID = mapID, x = x, y = y, time = now }
     return false
 end
 
@@ -143,10 +176,19 @@ local function TargetName(target)
     return GameTooltip:IsShown() and TooltipLine(GameTooltipTextLeft1) or nil
 end
 
--- Any character that points at a node learns roughly where it is, whether
--- or not they can gather it. The position is the character's, so it is
--- stored as approximate.
-local lastSeenName, lastSeenTime = nil, 0
+-- Any character that points at a node, or walks up to one, learns roughly
+-- where it is, whether or not they can gather it. The position is the
+-- character's, so it is stored as approximate. The saved data is shared by
+-- the whole account, so every character then knows the node.
+local function Sight(name, kind)
+    local gatherer = gatherers[kind]
+    if gatherer and gatherer.Sighted then
+        gatherer:Sighted(name)
+    end
+    local mapID, x, y = ns.GetPlayerPosition()
+    if not mapID or ns.NotedRecently(name, mapID, x, y) then return end
+    ns.RecordNode(name, "seen", true, kind)
+end
 
 local function OnTooltip(tooltip)
     if tooltip ~= GameTooltip then return end
@@ -162,15 +204,32 @@ local function OnTooltip(tooltip)
         end
     end
     if not name then return end
+    Sight(name, kind)
+end
 
-    local gatherer = gatherers[kind]
-    if gatherer and gatherer.Sighted then
-        gatherer:Sighted(name)
+---------------------------------------------------------------------------
+-- The interact highlight: walking up to a node
+---------------------------------------------------------------------------
+
+-- With the game's interact key (soft targeting), the object in front of
+-- the character is highlighted without the cursor on it. Its name is read
+-- through the "softinteract" unit, only when it is a game object (a node,
+-- a chest), never a creature or a player.
+local function SoftInteractName()
+    local guid = UnitGUID("softinteract")
+    if not ns.IsUsable(guid) or type(guid) ~= "string" or not guid:find("^GameObject") then return end
+    local name = UnitName("softinteract")
+    if ns.IsUsable(name) and name ~= "" then return name end
+end
+
+local function OnSoftInteract()
+    local name = SoftInteractName()
+    if not name or castGatherer[name] then return end
+    local kind = ns.ClassifyNodeName(name)
+    if ns.db.debug then
+        ns.Print(("interact highlight: \"%s\" is %s"):format(name, kind or "not a node I recognise"))
     end
-    local now = GetTime()
-    if name == lastSeenName and now - lastSeenTime < 5 then return end
-    lastSeenName, lastSeenTime = name, now
-    ns.RecordNode(name, "seen", true, kind)
+    if kind then Sight(name, kind) end
 end
 
 ---------------------------------------------------------------------------
@@ -242,7 +301,9 @@ function handlers.UI_ERROR_MESSAGE(_, message)
     end
     local kind = ProfessionMentioned(message)
     if not kind then return end
-    local name = HoveredNode() or TargetName(nil)
+    -- The node is the one under the cursor, or, when it was used with the
+    -- interact key, the one highlighted.
+    local name = HoveredNode() or TargetName(nil) or SoftInteractName()
     if name and not castGatherer[name] then
         ns.RecordNode(name, "failed", true, kind)
         ns.NoteRefused(name, kind, message)
@@ -250,6 +311,8 @@ function handlers.UI_ERROR_MESSAGE(_, message)
 end
 
 ---------------------------------------------------------------------------
+
+handlers.PLAYER_SOFT_INTERACT_CHANGED = OnSoftInteract
 
 local frame = CreateFrame("Frame")
 frame:SetScript("OnEvent", function(_, event, ...)
@@ -263,6 +326,7 @@ for _, event in ipairs({ "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET",
     pcall(frame.RegisterUnitEvent, frame, event, "player")
 end
 pcall(frame.RegisterEvent, frame, "UI_ERROR_MESSAGE")
+pcall(frame.RegisterEvent, frame, "PLAYER_SOFT_INTERACT_CHANGED")
 
 ns.onLogin[#ns.onLogin + 1] = function()
     -- Add each cast's name in the client's own language.

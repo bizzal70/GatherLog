@@ -1,5 +1,14 @@
 # GatherTrail
 
+## 0.18.1
+
+(0.18.0 was a packaging mistake: it held the same files as 0.17.3. This is the release it should have been.)
+
+- Riding or running past nodes records every one you point at. A second node with the same name was ignored for 5 seconds, so on a mount most of a row of veins was missed. Sightings are now judged by place, as on the minimap.
+- Walking up to a node records it even without the cursor on it, when the game highlights it for the interact key (soft targeting). Using a node with the interact key on a character without the profession counts as a failed attempt, as clicking it does.
+- Forever's low-level herbs ("Wilted Peacebloom", "Stunted Silverleaf") are recognised from the start, on the minimap and in the world, by the classic herb name inside theirs.
+- As always, what any character finds is shared with every character on the account.
+
 ## 0.17.3
 
 - Pointing at nodes on the minimap is more reliable. Moving the cursor straight from one node to another of the same name (Peacebloom to Peacebloom) used to record only the first, because the game keeps the tooltip up with the same text the whole way; and a second node of the same name was ignored for 5 seconds. Each node is now judged by where it is, so every one is recorded, and resting on one still records it only once.

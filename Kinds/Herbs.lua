@@ -4,8 +4,10 @@ local _, ns = ...
 -- name being one of these, by its tooltip naming the profession, or by a
 -- name already in the saved data. The list lets a herb seen only on the
 -- minimap (whose tooltip shows just the name) be recognised before it has
--- ever been picked. These are the classic herbs; a herb new to Forever is
--- still learned the first time it is picked.
+-- ever been picked. These are the classic herbs, matched as whole words
+-- so Forever's low-level versions ("Wilted Peacebloom", "Stunted
+-- Silverleaf") count too; a herb with a new name is learned the first time
+-- it is picked.
 local HERBS = {
     "Peacebloom", "Silverleaf", "Earthroot", "Mageroyal", "Briarthorn", "Stranglekelp",
     "Bruiseweed", "Wild Steelbloom", "Grave Moss", "Kingsblood", "Liferoot", "Fadeleaf",

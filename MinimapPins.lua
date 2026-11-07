@@ -164,24 +164,9 @@ end
 -- The game re-sets the minimap tooltip every frame while the cursor is on
 -- the minimap, so it stays up, with the same text, as the cursor slides
 -- from one Peacebloom to the next. Whether a blip is new is therefore
--- decided by place, not by the text changing: a name is recorded unless
--- the same name was just recorded close to where the cursor now points.
-ns.BLIP_SAME_YARDS = 20     -- a blip is a few pixels wide; this covers resting on one
-ns.BLIP_MEMORY_SECONDS = 60
-local recentBlips = {}      -- { name =, mapID =, x =, y =, time = }
-
-local function RecentlyRecorded(name, mapID, x, y, now)
-    for index = #recentBlips, 1, -1 do
-        local blip = recentBlips[index]
-        if now - blip.time > ns.BLIP_MEMORY_SECONDS then
-            table.remove(recentBlips, index)
-        elseif blip.name == name and blip.mapID == mapID
-            and ns.Distance(mapID, x, y, blip.x, blip.y) <= ns.BLIP_SAME_YARDS then
-            return true
-        end
-    end
-    return false
-end
+-- decided by place, not by the text changing (ns.NotedRecently: a name is
+-- recorded unless the same name was just noted close to where the cursor
+-- now points).
 
 -- The tooltip text last looked at, so debug mode reports each text once.
 -- false means the text was there but the client would not let it be read.
@@ -218,7 +203,6 @@ local function CheckMinimapTooltip()
     local width, height = ns.GetMapSize(mapID)
     -- Where the cursor points, on the zone map (map y grows south).
     local x, y = px + east / width, py - north / height
-    local now = GetTime()
 
     -- Several blips under the cursor are listed one per line.
     for line in text:gmatch("[^\n]+") do
@@ -227,8 +211,7 @@ local function CheckMinimapTooltip()
         if ns.db.debug and name ~= "" and newText then
             ns.Print(("minimap tooltip: \"%s\" is %s"):format(name, profession or "not a node name I know"))
         end
-        if profession and not RecentlyRecorded(name, mapID, x, y, now) then
-            recentBlips[#recentBlips + 1] = { name = name, mapID = mapID, x = x, y = y, time = now }
+        if profession and not ns.NotedRecently(name, mapID, x, y) then
             -- A minimap pixel is a few yards wide, so the place is close
             -- but not exact; gathering the node later pins it down.
             ns.RecordNode(name, "seen", true, profession, { x = x, y = y })

@@ -734,6 +734,48 @@ lo, hi = ns.GetZoneLevels(2521)
 check(lo == 12 and hi == 16, "creature levels survive export and import")
 UNITS.mouseover = nil
 
+-- Riding past nodes: every character that points at one, or walks up to
+-- one, records it for the whole account.
+ON_TAXI = true; P.map, P.x, P.y = 31, 0.1, 0.5; tick(); ON_TAXI = false
+NOW = NOW + 100
+GameTooltip.__shown = true; GameTooltipTextLeft2.__shown = true; GameTooltipTextLeft2.__text = "Requires Mining"
+local passed = {}
+for i = 1, 4 do
+    P.x = 0.1 + i * 0.1   -- 100 yards on each second, mounted
+    NOW = NOW + 1
+    GameTooltipTextLeft1.__text = "Copper Vein"
+    GameTooltip.__scripts.OnShow(GameTooltip)
+end
+check(ns.db.nodes[31] and #ns.db.nodes[31] == 4, "riding past four Copper Veins a second apart records all four")
+local firstVein = ns.db.nodes[31][1]
+P.x = 0.2; NOW = NOW + 1; GameTooltip.__scripts.OnShow(GameTooltip); GameTooltip.__scripts.OnShow(GameTooltip)
+check(#ns.db.nodes[31] == 4 and firstVein.seen == 1, "pointing at the same vein again does not count it twice")
+GameTooltip.__shown = false; GameTooltipTextLeft2.__shown = false
+
+check(ns.ClassifyNodeName("Wilted Peacebloom") == "herb" and ns.ClassifyNodeName("Stunted Silverleaf") == "herb",
+    "Forever's low-level herbs are known by the classic name inside theirs")
+check(ns.ClassifyNodeName("Peacebloomer") == nil and ns.ClassifyNodeName("Mailbox") == nil, "a name only containing part of a herb's word is not a herb")
+
+-- the interact highlight, with no cursor on the node
+P.x = 0.8; NOW = NOW + 1
+UNITS.softinteract = { name = "Wilted Peacebloom", guid = "GameObject-0-1-2-3" }
+Fire("PLAYER_SOFT_INTERACT_CHANGED", "", "GameObject-0-1-2-3")
+local walkedUp
+for _, node in ipairs(ns.db.nodes[31]) do if ns.NodeName(node) == "Wilted Peacebloom" then walkedUp = node end end
+check(walkedUp and walkedUp.kind == "herb" and walkedUp.seen == 1 and walkedUp.approx, "walking up to a herb records it, with no cursor on it")
+Fire("PLAYER_SOFT_INTERACT_CHANGED", "", "GameObject-0-1-2-3")
+check(walkedUp.seen == 1 and #ns.db.nodes[31] == 5, "the highlight flickering on the same herb counts once")
+Fire("UI_ERROR_MESSAGE", 50, "Requires Herbalism")
+check(walkedUp.fails == 1, "using it with the interact key without Herbalism counts as a failed attempt")
+UNITS.softinteract = { name = "Stormwind Guard", guid = "Creature-0-1-2-3" }
+Fire("PLAYER_SOFT_INTERACT_CHANGED", "", "Creature-0-1-2-3")
+UNITS.softinteract = { name = "Mailbox", guid = "GameObject-0-9" }
+Fire("PLAYER_SOFT_INTERACT_CHANGED", "", "GameObject-0-9")
+check(#ns.db.nodes[31] == 5, "a highlighted creature, or an object that is not a node, records nothing")
+UNITS.softinteract = nil
+Fire("PLAYER_SOFT_INTERACT_CHANGED", "GameObject-0-9", "")
+check(#ns.db.nodes[31] == 5, "the highlight going away records nothing")
+
 -- the window's profession tabs
 if not GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end
 local tabClicks = 0

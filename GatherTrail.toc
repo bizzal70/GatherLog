@@ -2,7 +2,7 @@
 ## Title: GatherTrail
 ## Notes: Records the ore, herbs, fishing pools, skinning spots, treasure chests and rare creatures your characters find, ranks the best places to gather each, and routes you there. Type /gt.
 ## Author: bizzal70
-## Version: 0.17.3
+## Version: 0.18.1
 ## X-Curse-Project-ID: 1790426
 ## SavedVariables: GatherTrailDB
 ## IconTexture: Interface\Icons\Trade_Mining
