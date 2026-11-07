@@ -20,6 +20,9 @@ local _, ns = ...
 --                    profession ("Mining"); optional
 --   nameWords        whole words that mark a bare name as this kind of
 --                    node ("Vein"); English only; optional
+--   names            whole names that are this kind of node, for kinds
+--                    whose names share no word (herbs); any capitals;
+--                    English only; optional
 -- and, optionally, three functions for kinds that do not fit the pattern:
 --   ResolveTarget(self, targetName)  the name to record for a cast, or nil
 --                                    to ignore the cast
@@ -61,10 +64,22 @@ function ns.HasWord(name, word)
     return name:find("%f[%a]" .. word .. "%f[%A]") ~= nil
 end
 
--- Whether a name contains one of a gatherer's nameWords.
+-- Whether a name belongs to a gatherer: it contains one of its nameWords
+-- ("Copper Vein" has "Vein"), or is one of its exact names (herbs share no
+-- word, so they are listed whole). Exact names ignore case.
+local exactNames = {}   -- gatherer -> { lowercased name = true }
 function ns.NameFits(gatherer, name)
     for _, word in ipairs(gatherer.nameWords or {}) do
         if ns.HasWord(name, word) then return true end
+    end
+    if gatherer.names then
+        local set = exactNames[gatherer]
+        if not set then
+            set = {}
+            for _, known in ipairs(gatherer.names) do set[known:lower()] = true end
+            exactNames[gatherer] = set
+        end
+        if type(name) == "string" and set[name:lower()] then return true end
     end
     return false
 end

@@ -1,5 +1,9 @@
 # GatherTrail
 
+## 0.17.1
+
+- Herbs are now recorded from the minimap. Pointing at a herb's minimap icon used to be ignored until that herb had been picked at least once, because a herb's name says nothing about being a herb (unlike "Copper Vein"). GatherTrail now knows the classic herb names from the start; a herb new to Forever is still learned the first time you pick it.
+
 ## 0.17.0 (beta)
 
 First public version.

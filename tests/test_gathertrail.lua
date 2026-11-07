@@ -460,10 +460,22 @@ NOW = NOW + 10; SlashCmdList.GATHERTRAIL("detect"); GameTooltipTextLeft1.__text 
 ns.CheckMinimapTooltip()
 check(#blips == 2, "minimap recording can be turned off")
 SlashCmdList.GATHERTRAIL("detect")
+-- A herb never picked before: its minimap tooltip shows only its name, so
+-- it must be known by name from the start (this was missed on live, where
+-- the saved data started empty).
+NOW = NOW + 10; GameTooltipTextLeft1.__text = "Earthroot"
+check(ns.knownNames["Earthroot"] == nil, "Earthroot has never been picked")
+ns.CheckMinimapTooltip()
+local herbBlips = 0
+for _, node in ipairs(blips) do if ns.NodeName(node) == "Earthroot" and ns.NodeProfession(node) == "herb" then herbBlips = herbBlips + 1 end end
+check(herbBlips == 1 and #blips == 3, "a herb blip on the minimap is recorded as a herb by its name alone, before it has ever been picked")
+check(ns.ClassifyNodeName("khadgar's whisker") == "herb" and ns.ClassifyNodeName("Black Lotus") == "herb",
+    "herb names are matched whatever their capitals")
+check(ns.ClassifyNodeName("Lotus Pond") == nil and ns.ClassifyNodeName("Stormwind Guard") == nil, "a name only partly like a herb's is not a herb")
 -- our own minimap pin's tooltip names a node, and must not be read back in
 NOW = NOW + 10; owner = { minimapPin = true }; GameTooltipTextLeft1.__text = "Silver Vein"
 ns.CheckMinimapTooltip()
-check(#blips == 2, "the addon's own pin tooltips are not recorded as blips")
+check(#blips == 3, "the addon's own pin tooltips are not recorded as blips")
 owner = nil; GameTooltip.__shown = false; MOUSE_OVER_MINIMAP = false
 
 -- treasure chests ---------------------------------------------------------
