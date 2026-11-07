@@ -119,6 +119,7 @@ for _, f in ipairs(Frames()) do
     end
 end
 check(clicks > 5, "clicked " .. clicks .. " UI controls without error")
+if ns.db.hidePins then ns.SetPinsHidden(false) end   -- one of those was the Hide pins button
 local mb = GatherTrailMinimapButton
 mb.__scripts.OnClick(mb, "LeftButton")
 mb.__scripts.OnEnter(mb)
@@ -170,7 +171,8 @@ ns.RefreshPins()
 for _, f in ipairs(Frames()) do if rawget(f, "node") and f.__scripts.OnEnter then f.__scripts.OnEnter(f); break end end
 for _, cmd in ipairs({ "skip", "stats", "pins", "pins", "debug", "debug", "help", "forget", "stop", "route 5" }) do SlashCmdList.GATHERTRAIL(cmd) end
 GatherTrail_OnAddonCompartmentClick()
-mb.__scripts.OnClick(mb, "RightButton")
+SHIFT_DOWN = true; mb.__scripts.OnClick(mb, "RightButton"); SHIFT_DOWN = false
+check(ns.GetRoute() == nil, "shift-right-click on the minimap button stops the route")
 check(true, "slash commands, pins and compartment entry ran")
 -- world map route: numbered stops, legs, player line
 P.map, P.x, P.y = 1, 0.5, 0.5
@@ -674,6 +676,48 @@ check(ns.db.nodes[8][1].mobs["Young Forest Bear"] == 1 and ns.db.nodes[6][1].kin
 check(ns.ImportData("hello") == nil, "text that is not an export is refused")
 local before = ns.CountNodes(6, "herb")
 check(before == 3 and ns.DeleteNodes(6, "herb") == 3 and ns.CountNodes(6, "herb") == 0 and ns.CountNodes(6, "ore") == 1, "deleting one kind in one zone leaves the rest")
+
+-- hiding every pin at once ------------------------------------------------------
+local function ShownNodePins()
+    local count = 0
+    for _, f in ipairs(Frames()) do
+        if (rawget(f, "node") or rawget(f, "marker")) and f.__shown then count = count + 1 end
+    end
+    return count
+end
+SlashCmdList.GATHERTRAIL("stop")
+if ns.db.hidePins then ns.SetPinsHidden(false) end   -- the click-everything test above pressed Hide pins
+P.map, P.x, P.y = 1, 0.5, 0.5
+WorldMapFrame.__shown = true; ns.RefreshPins(); ns.RefreshMinimapPins()
+local shownBefore = ShownNodePins()
+local kindsBefore, mapsBefore = ns.db.showKinds.herb, ns.db.showPins
+check(shownBefore > 0, "pins are shown to begin with (" .. shownBefore .. ")")
+mb.__scripts.OnClick(mb, "RightButton")
+check(ns.db.hidePins and ShownNodePins() == 0, "right-click on the minimap button hides every pin on both maps")
+check(ns.db.showKinds.herb == kindsBefore and ns.db.showPins == mapsBefore, "without changing the per-map or per-kind settings")
+mb.__scripts.OnEnter(mb)
+SlashCmdList.GATHERTRAIL("route")
+WorldMapFrame.__shown = true; ns.RefreshPins(); ns.RefreshMinimapPins()
+local _, hiddenRoute = ns.GetRoute()
+check(hiddenRoute and ShownNodePins() > 0, "a route being followed still shows its stops while pins are hidden")
+SlashCmdList.GATHERTRAIL("stop")
+ns.RefreshPins(); ns.RefreshMinimapPins()
+check(ShownNodePins() == 0, "and they go again when the route stops")
+SlashCmdList.GATHERTRAIL("hide")
+check(not ns.db.hidePins and ShownNodePins() == shownBefore, "/gt hide brings back exactly the pins there were")
+GatherTrail_TogglePins()
+check(ns.db.hidePins, "the key binding hides them")
+if not GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end
+local pinsButton
+for _, f in ipairs(Frames()) do
+    local label = rawget(f, "label")
+    if label and (label.__text == "Show pins" or label.__text == "Hide pins") and f.__scripts.OnClick then pinsButton = f end
+end
+check(pinsButton and pinsButton.label.__text == "Show pins", "the window's header button says Show pins while they are hidden")
+pinsButton.__scripts.OnClick(pinsButton, "LeftButton")
+check(not ns.db.hidePins and pinsButton.label.__text == "Hide pins" and ShownNodePins() == shownBefore, "and one click on it shows them again")
+SlashCmdList.GATHERTRAIL("")
+WorldMapFrame.__shown = false
 
 -- 3. options page ------------------------------------------------------------
 if not GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end

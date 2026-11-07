@@ -44,23 +44,33 @@ button:SetScript("OnDragStart", function(self) self:SetScript("OnUpdate", Follow
 button:SetScript("OnDragStop", function(self) self:SetScript("OnUpdate", nil) end)
 
 button:SetScript("OnClick", function(_, mouseButton)
-    if mouseButton == "RightButton" then
+    if mouseButton == "RightButton" and IsShiftKeyDown and IsShiftKeyDown() then
         ns.StopRoute()
         ns.RefreshPins()
         ns.Print("Route stopped.")
+    elseif mouseButton == "RightButton" then
+        ns.TogglePins()
     else
         ns.ToggleWindow()
     end
 end)
 
+-- The icon greys out while the pins are hidden, as a reminder.
+local function ShowPinsState(hidden)
+    icon:SetDesaturated(hidden)
+end
+ns.OnPinsToggled(ShowPinsState)
+
 button:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
     GameTooltip:AddLine("GatherTrail")
     GameTooltip:AddLine("Left-click: find the best place to mine", 1, 1, 1)
-    GameTooltip:AddLine("Right-click: stop the current route", 1, 1, 1)
+    GameTooltip:AddLine(ns.db.hidePins and "Right-click: show the pins again" or "Right-click: hide all pins", 1, 1, 1)
+    GameTooltip:AddLine("Shift-right-click: stop the current route", 1, 1, 1)
     GameTooltip:AddLine("Drag: move this button", 0.7, 0.7, 0.7)
     GameTooltip:Show()
 end)
 button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 ns.onLogin[#ns.onLogin + 1] = UpdatePosition
+ns.onLogin[#ns.onLogin + 1] = function() ShowPinsState(ns.db.hidePins) end

@@ -1,5 +1,10 @@
 # GatherTrail
 
+## 0.19.0
+
+- Hide all pins in one click, to declutter the maps: the new **Hide pins** button in the window's header, right-click on the minimap button, `/gt hide`, or a key binding (Key Bindings, AddOns, GatherTrail). Every node pin and travel marker goes from both the world map and the minimap; the same click brings them back exactly as they were. Stops on a route you are following stay visible. The minimap button's icon turns grey while pins are hidden.
+- Stopping the route from the minimap button is now **Shift + right-click**.
+
 ## 0.18.2
 
 - Every classic gathering node is now known by name: added Patch of Elemental Water (fishing) and Giant Clam (chests). All ores, herbs, fishing pools and chests from the original game are checked by the tests.

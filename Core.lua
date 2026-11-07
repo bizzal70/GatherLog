@@ -76,6 +76,7 @@ local defaults = {
     debug = false,
     showPins = true,
     showMinimapPins = true,
+    hidePins = false,   -- the one-click declutter; leaves the settings above alone
     minimapDetect = true,
     -- Minutes a gathered node is left out of routes; 0 turns that off.
     skipRecentMinutes = 10,
@@ -219,10 +220,38 @@ function ns.RebuildKnownNames()
     end
 end
 
--- Whether the maps should draw this node, going by its kind.
+-- Whether the maps should draw this node, going by its kind and by the
+-- hide-all-pins switch. Stops on a route being followed are drawn anyway.
 function ns.IsKindShown(node)
+    if ns.db.hidePins then return false end
     return ns.db.showKinds[ns.NodeProfession(node)] ~= false
 end
+
+-- Hides every pin on both maps at once, or brings them back as they were.
+-- The per-map and per-kind settings are not touched, so showing again
+-- restores exactly what was shown before.
+local pinsListeners = {}
+function ns.OnPinsToggled(listener) pinsListeners[#pinsListeners + 1] = listener end
+
+function ns.SetPinsHidden(hidden)
+    ns.db.hidePins = hidden and true or false
+    ns.RefreshPins()
+    ns.RefreshMinimapPins()
+    for _, listener in ipairs(pinsListeners) do listener(ns.db.hidePins) end
+    ns.Print(ns.db.hidePins and "All pins hidden. Type /gt hide, or right-click the minimap button, to show them again."
+        or "Pins shown.")
+end
+
+function ns.TogglePins()
+    ns.SetPinsHidden(not ns.db.hidePins)
+end
+
+-- For the key binding (Bindings.xml).
+function GatherTrail_TogglePins()
+    ns.TogglePins()
+end
+BINDING_HEADER_GATHERTRAIL = "GatherTrail"
+BINDING_NAME_GATHERTRAIL_TOGGLEPINS = "Hide or show all pins"
 
 -- Whether a node was gathered so recently that a route should pass it by.
 function ns.IsFresh(node)
@@ -440,6 +469,7 @@ local function PrintHelp()
     ns.Print("/gt travel - how many flight masters and zone connections are recorded")
     ns.Print("/gt travel clear - forget recorded transports (boats and the like)")
     ns.Print("/gt show [kind] - show or hide one kind of pin: ore, herb, fish, skin, chest, rare")
+    ns.Print("/gt hide - hide all pins on both maps, or show them again")
     ns.Print("/gt pins - show or hide nodes on the world map")
     ns.Print("/gt minimap - show or hide nodes on the minimap")
     ns.Print("/gt detect - record nodes you point at on the minimap, on or off")
@@ -486,6 +516,8 @@ SlashCmdList.GATHERTRAIL = function(msg)
         else
             ns.PrintTravelStats()
         end
+    elseif command == "hide" then
+        ns.TogglePins()
     elseif command == "pins" then
         ns.db.showPins = not ns.db.showPins
         ns.RefreshPins()

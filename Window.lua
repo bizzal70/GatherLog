@@ -15,7 +15,7 @@ local Num, Click, CreateButton, CreateList = UI.Num, UI.Click, UI.CreateButton, 
 local ACCENT_R, ACCENT_G, ACCENT_B = unpack(UI.ACCENT)
 
 local window, typeList, zoneList, contextLabel, statsLabel, emptyText
-local skillLabel, optionsButton
+local skillLabel, optionsButton, pinsButton
 local summaryTitle, summaryDetail, startButton, mapButton, stopButton
 local zoneHeading
 local tabs = {}
@@ -528,8 +528,15 @@ local function CreateWindow()
     end)
     optionsButton:SetHeight(24)
     optionsButton:SetPoint("RIGHT", close, "LEFT", -4, 0)
+    -- One click hides every pin on both maps; another brings them back.
+    pinsButton = CreateButton(header, ns.db.hidePins and "Show pins" or "Hide pins", 86, false, function()
+        ns.TogglePins()
+    end)
+    pinsButton:SetHeight(24)
+    pinsButton:SetPoint("RIGHT", optionsButton, "LEFT", -4, 0)
+    ns.OnPinsToggled(function(hidden) pinsButton.label:SetText(hidden and "Show pins" or "Hide pins") end)
     contextLabel = Label(header, "GameFontHighlight", "RIGHT")
-    contextLabel:SetPoint("RIGHT", optionsButton, "LEFT", -10, 0)
+    contextLabel:SetPoint("RIGHT", pinsButton, "LEFT", -10, 0)
 
     -- A one-line count of what the account has learned so far.
     local stats = CreateFrame("Frame", nil, window)

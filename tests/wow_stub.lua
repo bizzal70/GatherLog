@@ -110,6 +110,8 @@ end
 GetProfessionInfo = function(line) return "Profession", "icon", SKILLS[line], 300, 0, 0, line end
 -- Other units, keyed by unit token: { name, class, level, dead, player }
 UNITS = {}
+SHIFT_DOWN = false
+IsShiftKeyDown = function() return SHIFT_DOWN end
 UnitExists = function(unit) return UNITS[unit] ~= nil end
 UnitClassification = function(unit) return UNITS[unit] and UNITS[unit].class end
 UnitName = function(unit) return UNITS[unit] and UNITS[unit].name end

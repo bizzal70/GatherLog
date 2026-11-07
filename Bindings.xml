@@ -1,0 +1,5 @@
+<Bindings>
+    <Binding name="GATHERTRAIL_TOGGLEPINS" header="GATHERTRAIL" category="ADDONS">
+        GatherTrail_TogglePins()
+    </Binding>
+</Bindings>

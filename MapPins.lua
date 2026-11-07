@@ -172,6 +172,7 @@ function ns.RefreshPins()
     -- and the places zones have been walked between (small, unlabelled).
     local markerCount = pinCount
     local function Marker(point, label, size, r, g, b, title, note)
+        if ns.db.hidePins then return end
         markerCount = markerCount + 1
         local pin = AcquirePin(markerCount)
         pin.node, pin.stop, pin.stopCount = nil, nil, nil

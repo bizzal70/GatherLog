@@ -41,6 +41,7 @@ The **Options** button in the window, or these commands:
 | `/gt route` | Route through every node in the zone you are in |
 | `/gt skip`, `/gt stop` | Skip to the next stop, or stop the route |
 | `/gt show ore` (or `herb`, `fish`, `skin`, `chest`, `rare`) | Show or hide one kind of pin |
+| `/gt hide` | Hide every pin on both maps, or show them again (also the **Hide pins** button, right-click on the minimap button, or a key binding) |
 | `/gt pins`, `/gt minimap` | Show or hide pins on the world map or minimap |
 | `/gt beacon`, `/gt sound` | The in-world marker, and the sound on reaching a stop |
 | `/gt detect` | Record nodes you point at on the minimap |
