@@ -1,6 +1,6 @@
 local _, ns = ...
 
-local button = CreateFrame("Button", "GatherTrailMinimapButton", Minimap)
+local button = CreateFrame("Button", "GatherLogMinimapButton", Minimap)
 button:SetSize(31, 31)
 button:SetFrameStrata("MEDIUM")
 button:SetFrameLevel(8)
@@ -63,7 +63,7 @@ ns.OnPinsToggled(ShowPinsState)
 
 button:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:AddLine("GatherTrail")
+    GameTooltip:AddLine("GatherLog")
     GameTooltip:AddLine("Left-click: find the best place to mine", 1, 1, 1)
     GameTooltip:AddLine(ns.db.hidePins and "Right-click: show the pins again" or "Right-click: hide all pins", 1, 1, 1)
     GameTooltip:AddLine("Shift-right-click: stop the current route", 1, 1, 1)

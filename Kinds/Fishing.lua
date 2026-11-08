@@ -34,7 +34,7 @@ ns.RegisterKind({
     casts = { "Fishing" },
     spellIDs = { 7620 },
     -- "Oily Blackmouth School", "Floating Wreckage". On other languages
-    -- pools are learned with "/gt add fish <name>" and known by name after.
+    -- pools are learned with "/glog add fish <name>" and known by name after.
     nameWords = { "School", "Pool", "Wreckage", "Debris", "Swarm", "Floating", "Oil Spill", "Elemental Water" },
 
     Sighted = function(_, name)

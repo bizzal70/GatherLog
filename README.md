@@ -1,6 +1,8 @@
-# GatherTrail
+# GatherLog
 
 Remembers where your characters find things, works out the best place to go for more, and guides you there. An addon for World of Warcraft: Forever (client 1.60.x).
+
+Formerly called GatherTrail. It was renamed in 0.21.0 because another Forever addon called "Gather Trail" uses the same folder name and the same `/gt` command. Type `/glog` now.
 
 ## What it tracks
 
@@ -17,7 +19,7 @@ Every character on your account adds to the same history, including characters t
 
 ## Using it
 
-Click the pickaxe button on the minimap, or type `/gt`.
+Click the pickaxe button on the minimap, or type `/glog`.
 
 1. Pick a tab (Ore, Herbs, Fish, Skins, Chests, Rares) and, if you like, one or more types in the list.
 2. The right side ranks the zones you have records in. Hover a zone to see how its score was reached.
@@ -25,7 +27,7 @@ Click the pickaxe button on the minimap, or type `/gt`.
 
 The ranking weighs how many nodes a zone has and how often they have been there, how short a loop they make, how far away the zone is, whether it is above your level or hostile to your faction, and whether you have the skill for the nodes.
 
-GatherTrail starts empty. It has no built-in database; everything it knows, it learned from your own play.
+GatherLog starts empty. It has no built-in database; everything it knows, it learned from your own play.
 
 ## Getting between zones
 
@@ -37,18 +39,18 @@ The **Options** button in the window, or these commands:
 
 | Command | What it does |
 |---|---|
-| `/gt` | Open the window |
-| `/gt route` | Route through every node in the zone you are in |
-| `/gt skip`, `/gt stop` | Skip to the next stop, or stop the route |
-| `/gt show ore` (or `herb`, `fish`, `skin`, `chest`, `rare`) | Show or hide one kind of pin |
-| `/gt mine` | Show pins only for this character's professions (the default; chests and rares always show), or for everything |
-| `/gt hide` | Hide every pin on both maps, or show them again (also the **Hide pins** button, right-click on the minimap button, or a key binding) |
-| `/gt pins`, `/gt minimap` | Show or hide pins on the world map or minimap |
-| `/gt beacon`, `/gt sound` | The in-world marker, and the sound on reaching a stop |
-| `/gt detect` | Record nodes you point at on the minimap |
-| `/gt zone`, `/gt stats`, `/gt travel` | What is known about this zone, your records, and travel |
-| `/gt forget` | Delete the record nearest to you |
-| `/gt help` | List every command |
+| `/glog` | Open the window |
+| `/glog route` | Route through every node in the zone you are in |
+| `/glog skip`, `/glog stop` | Skip to the next stop, or stop the route |
+| `/glog show ore` (or `herb`, `fish`, `skin`, `chest`, `rare`) | Show or hide one kind of pin |
+| `/glog mine` | Show pins only for this character's professions (the default; chests and rares always show), or for everything |
+| `/glog hide` | Hide every pin on both maps, or show them again (also the **Hide pins** button, right-click on the minimap button, or a key binding) |
+| `/glog pins`, `/glog minimap` | Show or hide pins on the world map or minimap |
+| `/glog beacon`, `/glog sound` | The in-world marker, and the sound on reaching a stop |
+| `/glog detect` | Record nodes you point at on the minimap |
+| `/glog zone`, `/glog stats`, `/glog travel` | What is known about this zone, your records, and travel |
+| `/glog forget` | Delete the record nearest to you |
+| `/glog help` | List every command |
 
 Export and import are on the Options page. An export is plain text you can keep as a backup or give to a friend; importing never loses anything you already have.
 
@@ -67,7 +69,7 @@ Written and tested outside the game, but not yet seen working in it:
 - Flight masters and transports
 - The marker in the world on the next stop
 
-If one of these does not work for you, `/gt debug` prints what the game reports, which is what is needed to fix it.
+If one of these does not work for you, `/glog debug` prints what the game reports, which is what is needed to fix it.
 
 ## Known limits
 
@@ -79,7 +81,7 @@ If one of these does not work for you, `/gt debug` prints what the game reports,
 
 ## Your data
 
-Everything is saved on your own computer, in the game's saved-settings folder, as `GatherTrail.lua`. Nothing is sent anywhere.
+Everything is saved on your own computer, in the game's saved-settings folder, as `GatherLog.lua`. Nothing is sent anywhere.
 
 ## More from this author
 
@@ -95,7 +97,7 @@ Other small addons for World of Warcraft: Forever, all free:
 
 ## Installing
 
-Install it from [CurseForge](https://www.curseforge.com/wow/addons/gathertrail) (once approved) with the CurseForge app, or by hand: copy this folder into `World of Warcraft\_forever_\Interface\AddOns\` as `GatherTrail`, restart the game, and enable GatherTrail on the character select screen.
+Install it from [CurseForge](https://www.curseforge.com/wow/addons/gatherlog) (once approved) with the CurseForge app, or by hand: copy this folder into `World of Warcraft\_forever_\Interface\AddOns\` as `GatherLog`, restart the game, and enable GatherLog on the character select screen.
 
 ## Developing
 
@@ -109,13 +111,13 @@ Install it from [CurseForge](https://www.curseforge.com/wow/addons/gathertrail) 
 
 To also upload to CurseForge and Wago, two things are needed once:
 
-1. Create the project on each site, then add its ID to `GatherTrail.toc`:
+1. Create the project on each site, then add its ID to `GatherLog.toc`:
    `## X-Curse-Project-ID: 123456` and `## X-Wago-ID: abc123`.
 2. Create an upload token on each site and add it to this repository's secrets (Settings, Secrets and variables, Actions) as `CF_API_KEY` (or `CF_KEY`) and `WAGO_API_TOKEN`.
 
 CurseForge is set up (project 1790426); Wago is not.
 
-Before each release: raise `## Version:` in `GatherTrail.toc` and add the version to `CHANGELOG.md`.
+Before each release: raise `## Version:` in `GatherLog.toc` and add the version to `CHANGELOG.md`.
 
 ## Licence
 

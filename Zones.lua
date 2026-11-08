@@ -131,7 +131,7 @@ function ns.GetZoneLevels(mapID)
     end
 end
 
--- "/gt zone": what is known about the zone the player is in, and from where.
+-- "/glog zone": what is known about the zone the player is in, and from where.
 function ns.PrintZoneInfo()
     local mapID = Fact(C_Map.GetBestMapForUnit("player"))
     if not mapID then
@@ -156,9 +156,9 @@ function ns.PrintZoneInfo()
 
     local minLevel, maxLevel, source = ns.GetZoneLevels(mapID)
     if minLevel then
-        ns.Print(("GatherTrail is using level %d to %d."):format(minLevel, maxLevel))
+        ns.Print(("GatherLog is using level %d to %d."):format(minLevel, maxLevel))
     else
-        ns.Print("GatherTrail has no level range for it yet.")
+        ns.Print("GatherLog has no level range for it yet.")
     end
     local status = ns.db.zones[mapID]
     local faction = Fact(UnitFactionGroup("player"))

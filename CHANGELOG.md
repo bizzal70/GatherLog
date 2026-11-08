@@ -1,4 +1,8 @@
-# GatherTrail
+# GatherLog
+
+## 0.21.0
+
+- **GatherTrail is now GatherLog.** Another Forever addon on CurseForge is called "Gather Trail", installs into the same folder and also uses `/gt`, so the two could not be installed side by side. The slash command is now `/glog` (or `/gatherlog`), the folder is `GatherLog`, and the saved data is `GatherLogDB`. Nothing else changes. Entries below this one use the old name.
 
 ## 0.20.0
 

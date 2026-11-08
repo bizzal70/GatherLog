@@ -54,10 +54,10 @@ function ns.MigrateData(db)
     db.version = ns.DATA_VERSION
 end
 
--- "GatherTrail 0.16.0, saved data layout 2"
+-- "GatherLog 0.16.0, saved data layout 2"
 function ns.VersionText()
     local version = C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata(addonName, "Version")
-    return ("GatherTrail %s, saved data layout %d"):format(
+    return ("GatherLog %s, saved data layout %d"):format(
         ns.IsUsable(version) and version or "(unknown version)", ns.db.version or 1)
 end
 -- A node spotted from a distance is matched to the same ore within this range.
@@ -70,7 +70,7 @@ ns.onLogin = {}
 -- Every node name in the saved data, used to recognise nodes on sight.
 ns.knownNames = {}
 
--- GatherTrailDB is declared as SavedVariables (not SavedVariablesPerCharacter),
+-- GatherLogDB is declared as SavedVariables (not SavedVariablesPerCharacter),
 -- so every character on the account shares one node history.
 local defaults = {
     debug = false,
@@ -87,7 +87,7 @@ local defaults = {
 }
 
 function ns.Print(msg)
-    print("|cffd9a066GatherTrail|r: " .. tostring(msg))
+    print("|cffd9a066GatherLog|r: " .. tostring(msg))
 end
 
 -- Values can be secret on this client (mostly in combat). Secret values
@@ -245,7 +245,7 @@ function ns.SetPinsHidden(hidden)
     ns.RefreshPins()
     ns.RefreshMinimapPins()
     for _, listener in ipairs(pinsListeners) do listener(ns.db.hidePins) end
-    ns.Print(ns.db.hidePins and "All pins hidden. Type /gt hide, or right-click the minimap button, to show them again."
+    ns.Print(ns.db.hidePins and "All pins hidden. Type /glog hide, or right-click the minimap button, to show them again."
         or "Pins shown.")
 end
 
@@ -254,11 +254,11 @@ function ns.TogglePins()
 end
 
 -- For the key binding (Bindings.xml).
-function GatherTrail_TogglePins()
+function GatherLog_TogglePins()
     ns.TogglePins()
 end
-BINDING_HEADER_GATHERTRAIL = "GatherTrail"
-BINDING_NAME_GATHERTRAIL_TOGGLEPINS = "Hide or show all pins"
+BINDING_HEADER_GATHERLOG = "GatherLog"
+BINDING_NAME_GATHERLOG_TOGGLEPINS = "Hide or show all pins"
 
 -- Whether a node was gathered so recently that a route should pass it by.
 function ns.IsFresh(node)
@@ -466,32 +466,31 @@ function ns.ForgetNearest()
 end
 
 local function PrintHelp()
-    ns.Print("/gt - open the GatherTrail window")
-    ns.Print("/gt route [min times mined] - route through every node in this zone")
-    ns.Print("/gt skip - skip to the next node on the route")
-    ns.Print("/gt stop - stop the route")
-    ns.Print("/gt stats - how many nodes are recorded")
-    ns.Print("/gt version - the addon's version and the layout of its saved data")
-    ns.Print("/gt zone - what is known about this zone's level and faction, and from where")
-    ns.Print("/gt travel - how many flight masters and zone connections are recorded")
-    ns.Print("/gt travel clear - forget recorded transports (boats and the like)")
-    ns.Print("/gt show [kind] - show or hide one kind of pin: ore, herb, fish, skin, chest, rare")
-    ns.Print("/gt hide - hide all pins on both maps, or show them again")
-    ns.Print("/gt mine - show pins only for this character's professions, or for everything")
-    ns.Print("/gt pins - show or hide nodes on the world map")
-    ns.Print("/gt minimap - show or hide nodes on the minimap")
-    ns.Print("/gt detect - record nodes you point at on the minimap, on or off")
-    ns.Print("/gt beacon - turn the in-world marker on the next node on or off")
-    ns.Print("/gt sound - turn the arrival sound on or off")
-    ns.Print("/gt add [name] - record an ore node where you stand (/gt add herb, fish, skin, chest or rare [name] for the others)")
-    ns.Print("/gt forget - delete the recorded node nearest to you")
-    ns.Print("/gt debug - print every spell cast, to diagnose nodes not recording")
+    ns.Print("/glog - open the GatherLog window")
+    ns.Print("/glog route [min times mined] - route through every node in this zone")
+    ns.Print("/glog skip - skip to the next node on the route")
+    ns.Print("/glog stop - stop the route")
+    ns.Print("/glog stats - how many nodes are recorded")
+    ns.Print("/glog version - the addon's version and the layout of its saved data")
+    ns.Print("/glog zone - what is known about this zone's level and faction, and from where")
+    ns.Print("/glog travel - how many flight masters and zone connections are recorded")
+    ns.Print("/glog travel clear - forget recorded transports (boats and the like)")
+    ns.Print("/glog show [kind] - show or hide one kind of pin: ore, herb, fish, skin, chest, rare")
+    ns.Print("/glog hide - hide all pins on both maps, or show them again")
+    ns.Print("/glog mine - show pins only for this character's professions, or for everything")
+    ns.Print("/glog pins - show or hide nodes on the world map")
+    ns.Print("/glog minimap - show or hide nodes on the minimap")
+    ns.Print("/glog detect - record nodes you point at on the minimap, on or off")
+    ns.Print("/glog beacon - turn the in-world marker on the next node on or off")
+    ns.Print("/glog sound - turn the arrival sound on or off")
+    ns.Print("/glog add [name] - record an ore node where you stand (/glog add herb, fish, skin, chest or rare [name] for the others)")
+    ns.Print("/glog forget - delete the recorded node nearest to you")
+    ns.Print("/glog debug - print every spell cast, to diagnose nodes not recording")
 end
 
-SLASH_GATHERTRAIL1 = "/gt"
-SLASH_GATHERTRAIL2 = "/gather"
-SLASH_GATHERTRAIL3 = "/gathertrail"
-SlashCmdList.GATHERTRAIL = function(msg)
+SLASH_GATHERLOG1 = "/glog"
+SLASH_GATHERLOG2 = "/gatherlog"
+SlashCmdList.GATHERLOG = function(msg)
     local command, rest = (msg or ""):match("^%s*(%S*)%s*(.-)%s*$")
     command = command:lower()
     if command == "" then
@@ -552,7 +551,7 @@ SlashCmdList.GATHERTRAIL = function(msg)
         ns.db.sound = not ns.db.sound
         ns.Print("Arrival sound " .. (ns.db.sound and "on." or "off."))
     elseif command == "add" then
-        -- "/gt add herb Peacebloom" records a herb, and likewise for the
+        -- "/glog add herb Peacebloom" records a herb, and likewise for the
         -- other kinds; with no kind given it is ore.
         local kind, kindName = rest:match("^(%a+)%s*(.*)$")
         kind = kind and kind:lower()
@@ -571,7 +570,7 @@ SlashCmdList.GATHERTRAIL = function(msg)
             ns.RefreshMinimapPins()
             ns.Print(("%s pins %s."):format(kind, ns.db.showKinds[kind] and "shown" or "hidden"))
         else
-            ns.Print("Use /gt show ore, herb, fish, skin, chest or rare.")
+            ns.Print("Use /glog show ore, herb, fish, skin, chest or rare.")
         end
     elseif command == "debug" then
         ns.db.debug = not ns.db.debug
@@ -582,7 +581,7 @@ SlashCmdList.GATHERTRAIL = function(msg)
 end
 
 -- Entry in the minimap's addon list.
-function GatherTrail_OnAddonCompartmentClick()
+function GatherLog_OnAddonCompartmentClick()
     ns.ToggleWindow()
 end
 
@@ -592,32 +591,32 @@ frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" then
         if arg1 ~= addonName then return end
-        GatherTrailDB = GatherTrailDB or {}
+        GatherLogDB = GatherLogDB or {}
         for key, value in pairs(defaults) do
-            if GatherTrailDB[key] == nil then
-                GatherTrailDB[key] = value
+            if GatherLogDB[key] == nil then
+                GatherLogDB[key] = value
             end
         end
-        GatherTrailDB.nodes = GatherTrailDB.nodes or {}
-        GatherTrailDB.zones = GatherTrailDB.zones or {}
-        GatherTrailDB.flights = GatherTrailDB.flights or {}
-        GatherTrailDB.skills = GatherTrailDB.skills or {}
+        GatherLogDB.nodes = GatherLogDB.nodes or {}
+        GatherLogDB.zones = GatherLogDB.zones or {}
+        GatherLogDB.flights = GatherLogDB.flights or {}
+        GatherLogDB.skills = GatherLogDB.skills or {}
         -- Which kinds of node are drawn on the maps.
-        GatherTrailDB.showKinds = GatherTrailDB.showKinds or {}
+        GatherLogDB.showKinds = GatherLogDB.showKinds or {}
         for kind in pairs(ns.KINDS) do
-            if GatherTrailDB.showKinds[kind] == nil then
-                GatherTrailDB.showKinds[kind] = true
+            if GatherLogDB.showKinds[kind] == nil then
+                GatherLogDB.showKinds[kind] = true
             end
         end
-        GatherTrailDB.links = GatherTrailDB.links or {}
-        GatherTrailDB.chars = GatherTrailDB.chars or {}
-        ns.db = GatherTrailDB
+        GatherLogDB.links = GatherLogDB.links or {}
+        GatherLogDB.chars = GatherLogDB.chars or {}
+        ns.db = GatherLogDB
         ns.MigrateData(ns.db)
         ns.RebuildKnownNames()
         self:UnregisterEvent("ADDON_LOADED")
     elseif event == "PLAYER_LOGIN" then
         if ns.dataFromNewer then
-            ns.Print(("Your saved records were written by a newer GatherTrail (layout %d; this version understands %d). Update the addon before relying on it, or records may be misread."):format(
+            ns.Print(("Your saved records were written by a newer GatherLog (layout %d; this version understands %d). Update the addon before relying on it, or records may be misread."):format(
                 ns.dataFromNewer, ns.DATA_VERSION))
         end
         for _, init in ipairs(ns.onLogin) do

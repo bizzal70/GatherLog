@@ -183,7 +183,7 @@ local function CheckMinimapTooltip()
     end
     -- Our own pins and button put up tooltips over the minimap too.
     local owner = GameTooltip:GetOwner()
-    if owner and (owner.minimapPin or owner == GatherTrailMinimapButton) then return end
+    if owner and (owner.minimapPin or owner == GatherLogMinimapButton) then return end
 
     local text = GameTooltipTextLeft1:GetText()
     if not ns.IsUsable(text) then

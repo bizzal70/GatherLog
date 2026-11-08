@@ -459,7 +459,7 @@ local function CreateCloseButton(parent)
 end
 
 local function CreateWindow()
-    window = CreateFrame("Frame", "GatherTrailWindow", UIParent)
+    window = CreateFrame("Frame", "GatherLogWindow", UIParent)
     window:SetSize(WIDTH, HEIGHT)
     local position = ns.db.windowPosition
     if position then
@@ -476,7 +476,7 @@ local function CreateWindow()
     Gradient(window, "BACKGROUND", 0.035, 0.035, 0.045, 0.97, 0.085, 0.08, 0.085, 0.97)
     Outline(window, ACCENT_R, ACCENT_G, ACCENT_B, 0.55)
     -- Lets Escape close the window.
-    tinsert(UISpecialFrames, "GatherTrailWindow")
+    tinsert(UISpecialFrames, "GatherLogWindow")
 
     -- A soft dark rim outside the border, standing in for a drop shadow.
     local shadow = CreateFrame("Frame", nil, window)
@@ -517,7 +517,7 @@ local function CreateWindow()
 
     local title = Label(header, "GameFontNormalLarge")
     title:SetPoint("LEFT", iconFrame, "RIGHT", 10, 0)
-    title:SetText("GatherTrail")
+    title:SetText("GatherLog")
     title:SetTextColor(1, 0.9, 0.75)
 
     local close = CreateCloseButton(header)

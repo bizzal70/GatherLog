@@ -1,11 +1,10 @@
 {
     "runtime.version": "Lua 5.1",
     "diagnostics.globals": [
-        "GatherTrailDB",
+        "GatherLogDB",
         "SlashCmdList",
-        "SLASH_GATHERTRAIL1",
-        "SLASH_GATHERTRAIL2",
-        "SLASH_GATHERTRAIL3"
+        "SLASH_GATHERLOG1",
+        "SLASH_GATHERLOG2"
     ],
     "workspace.ignoreDir": [
         ".claude"

@@ -18,8 +18,8 @@ lua = lua51.LuaRuntime(unpack_returned_tuples=True)
 lua.globals().ADDON_DIR = ADDON.as_posix()
 lua.execute((TESTS / "wow_stub.lua").read_text(encoding="utf-8"))
 try:
-    lua.execute((TESTS / "test_gathertrail.lua").read_text(encoding="utf-8"))
-    print("test_gathertrail.lua: ALL PASSED")
+    lua.execute((TESTS / "test_gatherlog.lua").read_text(encoding="utf-8"))
+    print("test_gatherlog.lua: ALL PASSED")
 except Exception as error:
-    print(f"test_gathertrail.lua: ERROR: {error}")
+    print(f"test_gatherlog.lua: ERROR: {error}")
     sys.exit(1)

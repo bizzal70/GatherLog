@@ -5,7 +5,7 @@ name: Release
 # to CurseForge and Wago.
 #
 # The uploads need two things that are not here yet:
-#   * the project IDs in GatherTrail.toc (X-Curse-Project-ID, X-Wago-ID)
+#   * the project IDs in GatherLog.toc (X-Curse-Project-ID, X-Wago-ID)
 #   * the upload tokens as repository secrets (CF_API_KEY or CF_KEY, WAGO_API_TOKEN)
 # Until both are in place for a site, that site is simply skipped.
 on:

@@ -10,7 +10,9 @@ local _, ns = ...
 -- Importing merges: a record already present is updated to the larger of
 -- each count, so importing the same text twice changes nothing.
 
-local HEADER = "GatherTrail1"
+local HEADER = "GatherLog1"
+-- Text exported before the rename to GatherLog (0.21.0) still imports.
+local OLD_HEADER = "GatherTrail1"
 
 local function Escape(text)
     return (tostring(text):gsub("[%%,;=\n\r]", function(c) return ("%%%02X"):format(c:byte()) end))
@@ -191,8 +193,8 @@ function ns.ImportData(text)
     for line in text:gmatch("[^\r\n]+") do
         lines[#lines + 1] = line:match("^%s*(.-)%s*$")
     end
-    if lines[1] ~= HEADER then
-        return nil, "That does not look like GatherTrail data."
+    if lines[1] ~= HEADER and lines[1] ~= OLD_HEADER then
+        return nil, "That does not look like GatherLog data."
     end
 
     local added, merged, other = 0, 0, 0

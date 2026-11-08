@@ -1,5 +1,5 @@
 # Tells the release packager what goes in the zip players download.
-package-as: GatherTrail
+package-as: GatherLog
 
 manual-changelog:
   filename: CHANGELOG.md

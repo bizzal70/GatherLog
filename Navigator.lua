@@ -119,7 +119,7 @@ end
 -- Arrow panel
 ---------------------------------------------------------------------------
 
-local nav = CreateFrame("Frame", "GatherTrailNavigator", UIParent)
+local nav = CreateFrame("Frame", "GatherLogNavigator", UIParent)
 nav:SetSize(250, 64)
 nav:SetPoint("CENTER", UIParent, "CENTER", 0, -180)
 nav:SetMovable(true)
@@ -346,7 +346,7 @@ end
 
 function ns.SkipNode()
     if not route then
-        ns.Print("No route is active. Open /gt to start one.")
+        ns.Print("No route is active. Open /glog to start one.")
         return
     end
     if travel then

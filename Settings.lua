@@ -23,7 +23,7 @@ end
 
 local function CreateDialog()
     local UI = ns.UI
-    dialog = CreateFrame("Frame", "GatherTrailDataDialog", UIParent)
+    dialog = CreateFrame("Frame", "GatherLogDataDialog", UIParent)
     dialog:SetSize(560, 380)
     dialog:SetPoint("CENTER")
     dialog:SetFrameStrata("DIALOG")
@@ -32,7 +32,7 @@ local function CreateDialog()
     dialog:Hide()
     UI.Fill(dialog, 0.05, 0.05, 0.06, 0.98)
     UI.Outline(dialog, UI.ACCENT[1], UI.ACCENT[2], UI.ACCENT[3], 0.6)
-    tinsert(UISpecialFrames, "GatherTrailDataDialog")
+    tinsert(UISpecialFrames, "GatherLogDataDialog")
 
     dialog.title = UI.Label(dialog, "GameFontNormalLarge")
     dialog.title:SetPoint("TOPLEFT", 14, -12)
@@ -96,7 +96,7 @@ end
 local function ShowImport()
     if not dialog then CreateDialog() end
     dialog.title:SetText("Import")
-    dialogNote:SetText("Paste exported GatherTrail data here (Ctrl+V), then press Import. Nothing you already have is lost.")
+    dialogNote:SetText("Paste exported GatherLog data here (Ctrl+V), then press Import. Nothing you already have is lost.")
     importButton:Show()
     editBox:SetText("")
     dialog:Show()

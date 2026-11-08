@@ -13,7 +13,7 @@ local _, ns = ...
 --   key              the kind it records: "ore", "herb", "fish", ...
 --   casts            names the gathering cast can have. Casts are matched
 --                    by name because the spell IDs on this client are not
---                    known; /gt debug prints the real names and IDs.
+--                    known; /glog debug prints the real names and IDs.
 --   spellIDs         original-game spells whose names, if they exist here,
 --                    are added to casts so other languages work
 --   professionWords  what a node's tooltip or a skill error calls the

@@ -1,4 +1,4 @@
-local ns = LoadAddon(ADDON_DIR, "GatherTrail")
+local ns = LoadAddon(ADDON_DIR, "GatherLog")
 local P = PLAYER
 local function check(cond, what) if not cond then error("CHECK FAILED: " .. what, 2) end; io.write("pass  ", what, "\n") end
 local function mine(name, guid, ok)
@@ -8,7 +8,7 @@ end
 
 -- saved data from an older version: a node, a thing once mistaken for a
 -- node, and a bogus connection between the continent map and a zone
-GatherTrailDB = {
+GatherLogDB = {
     nodes = {
         [2521] = { { x = 0.3632886409759522, y = 0.5979678630828857, count = 0, first = 1, last = 1, names = { ["Copper Vein"] = 1 } } },
         [77] = { { x = 0.5, y = 0.5, count = 0, seen = 1, approx = true, first = 1, last = 1, names = { Lodestone = 1 } } },
@@ -17,8 +17,8 @@ GatherTrailDB = {
         a = { map = 10, x = 0.5, y = 0.5, inst = 0, wx = 0, wy = 0 },
         b = { map = 1, x = 0.5, y = 0.5, inst = 0, wx = 0, wy = 0 } } },
 }
-Fire("ADDON_LOADED", "GatherTrail"); Fire("PLAYER_LOGIN")
-check(GatherTrailDB and ns.db == GatherTrailDB, "saved variables initialised")
+Fire("ADDON_LOADED", "GatherLog"); Fire("PLAYER_LOGIN")
+check(GatherLogDB and ns.db == GatherLogDB, "saved variables initialised")
 check(#ns.db.nodes[2521] == 1, "records already saved are kept")
 check(#ns.db.links == 0, "a connection recorded against the continent map is dropped")
 check(#ns.db.nodes[77] == 0 and ns.ClassifyNodeName("Lodestone") == nil, "a Lodestone is no longer taken for an ore node, and the one recorded is removed")
@@ -45,8 +45,8 @@ do
     ns.MigrateData(newer)
     check(newer.version == ns.DATA_VERSION + 5 and #newer.nodes[5] == 1 and ns.dataFromNewer == ns.DATA_VERSION + 5, "data from a newer version of the addon is not touched, and is flagged")
     ns.dataFromNewer = nil
-    SlashCmdList.GATHERTRAIL("version")
-    check(PRINTED[#PRINTED]:find("0.0.0-test, saved data layout " .. ns.DATA_VERSION, 1, true) ~= nil, "/gt version reports the addon version and data layout")
+    SlashCmdList.GATHERLOG("version")
+    check(PRINTED[#PRINTED]:find("0.0.0-test, saved data layout " .. ns.DATA_VERSION, 1, true) ~= nil, "/glog version reports the addon version and data layout")
 end
 ns.db.skipRecentMinutes = 0   -- the route tests below revisit nodes at once; freshness has its own test
 
@@ -84,11 +84,11 @@ GameTooltip.__scripts.OnShow(GameTooltip)
 check(#ns.db.nodes[1] == 3, "non-node tooltip ignored")
 GameTooltip.__shown = false
 
-for i = 1, 8 do P.x, P.y = 0.1 + i * 0.09, 0.2 + ((i * 37) % 50) / 100; SlashCmdList.GATHERTRAIL("add Copper Vein") end
+for i = 1, 8 do P.x, P.y = 0.1 + i * 0.09, 0.2 + ((i * 37) % 50) / 100; SlashCmdList.GATHERLOG("add Copper Vein") end
 check(#ns.db.nodes[1] == 11, "manual adds")
 P.map = 2
-for i = 1, 3 do P.x, P.y = 0.2 + i * 0.02, 0.5; SlashCmdList.GATHERTRAIL("add Iron Deposit") end
-P.map = 3; P.x, P.y = 0.5, 0.5; SlashCmdList.GATHERTRAIL("add Copper Vein")
+for i = 1, 3 do P.x, P.y = 0.2 + i * 0.02, 0.5; SlashCmdList.GATHERLOG("add Iron Deposit") end
+P.map = 3; P.x, P.y = 0.5, 0.5; SlashCmdList.GATHERLOG("add Copper Vein")
 check(ns.db.zones[2].Alliance == "hostile", "zone faction status recorded")
 
 P.map, P.x, P.y = 1, 0.5, 0.5
@@ -109,22 +109,22 @@ local r = ranked[1].route
 local seen = {}; for _, n in ipairs(r) do assert(not seen[n]); seen[n] = true end
 check(#r == 11, "route visits each node once")
 
-SlashCmdList.GATHERTRAIL("")
-check(GatherTrailWindow:IsShown(), "window opens")
+SlashCmdList.GATHERLOG("")
+check(GatherLogWindow:IsShown(), "window opens")
 -- click everything clickable in the UI
 local clicks = 0
 for _, f in ipairs(Frames()) do
     local label = rawget(f, "label")
     local isOptions = label and label.__text == "Options"   -- the options page has its own test
-    if f.__scripts.OnClick and f.__shown ~= false and f ~= GatherTrailMinimapButton and not isOptions then
-        if not GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end
+    if f.__scripts.OnClick and f.__shown ~= false and f ~= GatherLogMinimapButton and not isOptions then
+        if not GatherLogWindow:IsShown() then SlashCmdList.GATHERLOG("") end
         if f.__scripts.OnEnter then f.__scripts.OnEnter(f) end   -- row and button tooltips
         f.__scripts.OnClick(f, "LeftButton"); clicks = clicks + 1
     end
 end
 check(clicks > 5, "clicked " .. clicks .. " UI controls without error")
 if ns.db.hidePins then ns.SetPinsHidden(false) end   -- one of those was the Hide pins button
-local mb = GatherTrailMinimapButton
+local mb = GatherLogMinimapButton
 mb.__scripts.OnClick(mb, "LeftButton")
 mb.__scripts.OnEnter(mb)
 mb.__scripts.OnDragStart(mb); mb.__scripts.OnUpdate(mb, 0.1); mb.__scripts.OnDragStop(mb)
@@ -136,10 +136,10 @@ local ownPin = { 9, 0.1, 0.1 }
 WAYPOINT = ownPin
 ns.StartRoute(2, z2.route)
 check(WAYPOINT[1] == 2 and WAYPOINT[2] == z2.route[1].x and SUPERTRACKED == true, "beacon placed on first node in another zone and tracked")
-local nav = GatherTrailNavigator
+local nav = GatherLogNavigator
 nav.__scripts.OnUpdate(nav, 0.2)
 ns.StartRoute(3, z3.route); nav.__scripts.OnUpdate(nav, 0.2)
-SlashCmdList.GATHERTRAIL("route")
+SlashCmdList.GATHERLOG("route")
 local _, route, index = ns.GetRoute()
 check(route and index == 1, "zone route started")
 P.x, P.y = route[1].x + 0.3, route[1].y
@@ -156,31 +156,31 @@ for _, facing in ipairs({ 0, 1.5, 3.1, 4.7, 6.2 }) do
     P.x, P.y, P.facing = route[2].x + 0.1, route[2].y + 0.2, facing
     nav.__scripts.OnUpdate(nav, 0.2)
 end
-SlashCmdList.GATHERTRAIL("beacon")
+SlashCmdList.GATHERLOG("beacon")
 check(WAYPOINT == ownPin and not ns.db.beacon, "turning the beacon off restores the player's own pin")
-SlashCmdList.GATHERTRAIL("beacon")
+SlashCmdList.GATHERLOG("beacon")
 check(WAYPOINT[1] == 1 and SUPERTRACKED == true, "turning it back on re-places it")
 -- client refuses the tracking call
-Fire("ADDON_ACTION_FORBIDDEN", "GatherTrail", "C_SuperTrack.SetSuperTrackedUserWaypoint()")
+Fire("ADDON_ACTION_FORBIDDEN", "GatherLog", "C_SuperTrack.SetSuperTrackedUserWaypoint()")
 SUPERTRACKED = false
-SlashCmdList.GATHERTRAIL("skip")
+SlashCmdList.GATHERLOG("skip")
 check(SUPERTRACKED == false and WAYPOINT[2] == route[3].x, "after a refusal: map pin still moves, tracking no longer attempted")
-SlashCmdList.GATHERTRAIL("stop")
+SlashCmdList.GATHERLOG("stop")
 check(WAYPOINT == ownPin, "stopping the route restores the player's own pin")
-SlashCmdList.GATHERTRAIL("sound"); SlashCmdList.GATHERTRAIL("sound")
-SlashCmdList.GATHERTRAIL("route")
+SlashCmdList.GATHERLOG("sound"); SlashCmdList.GATHERLOG("sound")
+SlashCmdList.GATHERLOG("route")
 _, route = ns.GetRoute()
 WorldMapFrame.__shown = true
 ns.RefreshPins()
 for _, f in ipairs(Frames()) do if rawget(f, "node") and f.__scripts.OnEnter then f.__scripts.OnEnter(f); break end end
-for _, cmd in ipairs({ "skip", "stats", "pins", "pins", "debug", "debug", "help", "forget", "stop", "route 5" }) do SlashCmdList.GATHERTRAIL(cmd) end
-GatherTrail_OnAddonCompartmentClick()
+for _, cmd in ipairs({ "skip", "stats", "pins", "pins", "debug", "debug", "help", "forget", "stop", "route 5" }) do SlashCmdList.GATHERLOG(cmd) end
+GatherLog_OnAddonCompartmentClick()
 SHIFT_DOWN = true; mb.__scripts.OnClick(mb, "RightButton"); SHIFT_DOWN = false
 check(ns.GetRoute() == nil, "shift-right-click on the minimap button stops the route")
 check(true, "slash commands, pins and compartment entry ran")
 -- world map route: numbered stops, legs, player line
 P.map, P.x, P.y = 1, 0.5, 0.5
-SlashCmdList.GATHERTRAIL("route")
+SlashCmdList.GATHERLOG("route")
 local _, mapRoute, mapIndex = ns.GetRoute()
 WorldMapFrame.__shown = true
 ns.RefreshPins()
@@ -211,8 +211,8 @@ check(true, "map and player line redraw on and off the route's map")
 -- minimap pins: stub minimap is 140 wide showing 100 yards, so 0.7 px per yard
 ns.StopRoute()
 P.map, P.y, P.facing = 5, 0.5, 0
-P.x = 0.55; SlashCmdList.GATHERTRAIL("add Near Vein")   -- 50 yards east of centre
-P.x = 0.90; SlashCmdList.GATHERTRAIL("add Far Vein")    -- 400 yards east
+P.x = 0.55; SlashCmdList.GATHERLOG("add Near Vein")   -- 50 yards east of centre
+P.x = 0.90; SlashCmdList.GATHERLOG("add Far Vein")    -- 400 yards east
 P.x = 0.50
 local function minimapPins()
     local shown = {}
@@ -237,16 +237,16 @@ shown = minimapPins()
 local rim = shown[#shown]
 check(#shown == 2 and ns.NodeName(rim.node) == "Far Vein" and near(rim.__point[4], 65) and near(rim.__point[5], 0), "route target out of range is held on the rim")
 shown[1].__scripts.OnEnter(shown[1])
-SlashCmdList.GATHERTRAIL("minimap")
+SlashCmdList.GATHERLOG("minimap")
 check(#minimapPins() == 0, "minimap pins can be turned off")
-SlashCmdList.GATHERTRAIL("minimap")
+SlashCmdList.GATHERLOG("minimap")
 ns.StopRoute()
 
 -- travel knowledge -------------------------------------------------------
 local tick = TICKERS[1]
 check(type(tick) == "function", "movement tracker started at login")
 local function has(steps, i, text) return steps[i] and steps[i].text:find(text, 1, true) ~= nil end
-local nav = GatherTrailNavigator
+local nav = GatherLogNavigator
 
 -- flight masters: standing at Alpha in zone 1; Beta (zone 2) is learned but
 -- never visited; Gamma is not learned
@@ -330,9 +330,9 @@ P.map, P.x, P.y = 2, beta.x, beta.y
 Fire("PLAYER_CONTROL_GAINED")
 targetMap, target, travelling = ns.GetGuideTarget()
 check(not travelling and targetMap == 2 and target == z2.route[1], "landing in the destination zone hands over to the mining route")
-SlashCmdList.GATHERTRAIL("travel")
+SlashCmdList.GATHERLOG("travel")
 ns.StopRoute()
-SlashCmdList.GATHERTRAIL("travel clear")
+SlashCmdList.GATHERLOG("travel clear")
 check(#ns.db.links == 1 and ns.db.links[1].kind == "walk", "clearing transports keeps walked crossings")
 
 -- herbalism ---------------------------------------------------------------
@@ -353,8 +353,8 @@ check(#herbs == 3 and herbs[3].kind == "herb" and herbs[3].seen == 1 and herbs[3
 Fire("UI_ERROR_MESSAGE", 50, "Requires Herbalism")
 check(#herbs == 3 and herbs[3].fails == 1, "a Herbalism skill error counts as a failed attempt on the herb")
 GameTooltip.__shown = false
-P.x = 0.3; SlashCmdList.GATHERTRAIL("add herb Mageroyal")
-check(#herbs == 4 and herbs[4].kind == "herb" and ns.NodeName(herbs[4]) == "Mageroyal", "/gt add herb records a herb")
+P.x = 0.3; SlashCmdList.GATHERLOG("add herb Mageroyal")
+check(#herbs == 4 and herbs[4].kind == "herb" and ns.NodeName(herbs[4]) == "Mageroyal", "/glog add herb records a herb")
 
 local herbTypes, herbTotal = ns.GetNodeTypes("herb")
 check(#herbTypes == 3 and herbTotal == 3, "herb tab lists only herbs: " .. #herbTypes .. " types, " .. herbTotal .. " nodes")
@@ -387,8 +387,8 @@ check(near(pools[1].x, 0.5) and near(pools[1].y, 0.5 - 15 / 667), "the pool is p
 NOW = NOW + 600
 fish("f2")
 check(pools[1].count == 1, "a cast long after pointing at the pool does not count")
-P.x = 0.8; SlashCmdList.GATHERTRAIL("add fish Floating Wreckage")
-check(#pools == 2 and pools[2].kind == "fish", "/gt add fish records a pool")
+P.x = 0.8; SlashCmdList.GATHERLOG("add fish Floating Wreckage")
+check(#pools == 2 and pools[2].kind == "fish", "/glog add fish records a pool")
 local poolTypes, poolTotal = ns.GetNodeTypes("fish")
 check(#poolTypes == 2 and poolTotal == 2, "fish tab lists only pools")
 local poolZones = ns.RankZones({}, "fish")
@@ -428,7 +428,7 @@ local skinTypes = ns.GetNodeTypes("skin")
 check(#skinTypes == 3, "skins tab lists leather types (and the creature fallback)")
 local leather = ns.RankZones({ ["Light Leather"] = true }, "skin")
 check(#leather == 1 and leather[1].mapID == 8 and leather[1].nodeCount == 1, "skin ranking filters by material")
-SlashCmdList.GATHERTRAIL("add skin Heavy Leather")
+SlashCmdList.GATHERLOG("add skin Heavy Leather")
 WorldMapFrame.__shown = true; ns.RefreshPins()
 for _, f in ipairs(Frames()) do
     if rawget(f, "node") and ns.NodeProfession(f.node) == "skin" and f.__shown and f.__scripts.OnEnter then f.__scripts.OnEnter(f) end
@@ -459,13 +459,13 @@ ns.CheckMinimapTooltip(); ns.CheckMinimapTooltip()   -- polled repeatedly while 
 check(#blips == 2 and near(blips[2].x, 0.5 - 20 * yardsPerPixel / 1000) and near(blips[2].y, 0.5 - 50 * yardsPerPixel / 667), "a rotating minimap is turned back before placing the blip")
 ROTATE_MINIMAP, P.facing = "0", 0
 NOW = NOW + 10; GameTooltipTextLeft1.__text = "Stormwind Guard"
-SlashCmdList.GATHERTRAIL("debug"); ns.CheckMinimapTooltip(); SlashCmdList.GATHERTRAIL("debug")
+SlashCmdList.GATHERLOG("debug"); ns.CheckMinimapTooltip(); SlashCmdList.GATHERLOG("debug")
 check(#blips == 2, "a minimap blip that is not a node is ignored")
 check(PRINTED[#PRINTED - 1]:find("Stormwind Guard", 1, true) ~= nil, "debug mode says what the minimap tooltip read and why it was passed over")
-NOW = NOW + 10; SlashCmdList.GATHERTRAIL("detect"); GameTooltipTextLeft1.__text = "Iron Deposit"
+NOW = NOW + 10; SlashCmdList.GATHERLOG("detect"); GameTooltipTextLeft1.__text = "Iron Deposit"
 ns.CheckMinimapTooltip()
 check(#blips == 2, "minimap recording can be turned off")
-SlashCmdList.GATHERTRAIL("detect")
+SlashCmdList.GATHERLOG("detect")
 -- A herb never picked before: its minimap tooltip shows only its name, so
 -- it must be known by name from the start (this was missed on live, where
 -- the saved data started empty).
@@ -526,8 +526,8 @@ P.x = 0.7
 GameTooltip.__shown = true; GameTooltipTextLeft1.__text = "Solid Chest"; GameTooltipTextLeft2.__shown = false
 GameTooltip.__scripts.OnShow(GameTooltip); GameTooltip.__shown = false
 check(#chests == 2 and chests[2].kind == "chest" and chests[2].seen == 1 and chests[2].approx, "pointing at a chest records a sighting")
-P.x = 0.3; SlashCmdList.GATHERTRAIL("add chest Large Iron Bound Chest")
-check(#chests == 3 and chests[3].kind == "chest", "/gt add chest records a chest")
+P.x = 0.3; SlashCmdList.GATHERLOG("add chest Large Iron Bound Chest")
+check(#chests == 3 and chests[3].kind == "chest", "/glog add chest records a chest")
 local chestTypes = ns.GetNodeTypes("chest")
 local chestZones = ns.RankZones({}, "chest")
 check(#chestTypes == 3 and #chestZones == 1 and chestZones[1].mapID == 11, "chests tab lists and ranks only chests")
@@ -568,7 +568,7 @@ Fire("VIGNETTES_UPDATED")
 check(#rares == 3 and byName.Silvermane.seen == 1, "a marker is only recorded once")
 local rareZones = ns.RankZones({}, "rare")
 check(#ns.GetNodeTypes("rare") == 2 and #rareZones == 1 and rareZones[1].nodeCount == 2, "rares tab lists and ranks only rares")
-SlashCmdList.GATHERTRAIL("add rare Test Rare")
+SlashCmdList.GATHERLOG("add rare Test Rare")
 WorldMapFrame.__shown = true; ns.RefreshPins(); ns.RefreshMinimapPins()
 for _, f in ipairs(Frames()) do
     if rawget(f, "node") and ns.NodeProfession(f.node) == "rare" and f.__shown and f.__scripts.OnEnter then f.__scripts.OnEnter(f) end
@@ -588,14 +588,14 @@ ns.StopRoute()
 ON_TAXI = true; P.map, P.x, P.y = 6, 0.5, 0.5; tick(); ON_TAXI = false
 WorldMapFrame.__shown = true; ns.RefreshPins(); ns.RefreshMinimapPins()
 check(shownPins(isHerbMapPin) == 3 and shownPins(isHerbMiniPin) >= 1, "herb pins show on both maps by default")
-SlashCmdList.GATHERTRAIL("show herb")
-check(shownPins(isHerbMapPin) == 0 and shownPins(isHerbMiniPin) == 0, "/gt show herb hides herb pins on both maps")
+SlashCmdList.GATHERLOG("show herb")
+check(shownPins(isHerbMapPin) == 0 and shownPins(isHerbMiniPin) == 0, "/glog show herb hides herb pins on both maps")
 check(shownPins(function(f) return rawget(f, "label") and ns.NodeProfession(f.node) == "ore" end) == 1, "other kinds stay visible")
 ns.StartRoute(6, { ns.db.nodes[6][1] })
 ns.RefreshPins()
 check(shownPins(isHerbMapPin) == 1, "a hidden kind still shows the stops of the route being followed")
 ns.StopRoute()
-SlashCmdList.GATHERTRAIL("show herb")
+SlashCmdList.GATHERLOG("show herb")
 check(ns.db.showKinds.herb == true, "the kind can be shown again")
 
 -- 2. skill awareness -------------------------------------------------------
@@ -613,7 +613,7 @@ Fire("UI_ERROR_MESSAGE", 50, "Requires Mining 65")
 GameTooltip.__shown = false
 local able, need = ns.CanGather("Tin Vein", "ore")
 check(able == "no" and need == 65, "a skill error teaches the requirement")
-P.x = 0.7; SlashCmdList.GATHERTRAIL("add Tin Vein")
+P.x = 0.7; SlashCmdList.GATHERLOG("add Tin Vein")
 P.x = 0.5
 local skillZone
 for _, z in ipairs(ns.RankZones({}, "ore")) do if z.mapID == 13 then skillZone = z end end
@@ -627,7 +627,7 @@ SKILLS[186] = nil
 
 -- 4. freshness ---------------------------------------------------------------
 ON_TAXI = true; P.map, P.x, P.y = 14, 0.1, 0.5; tick(); ON_TAXI = false
-for i = 1, 3 do P.x = 0.1 + i * 0.2; SlashCmdList.GATHERTRAIL("add Iron Deposit") end
+for i = 1, 3 do P.x = 0.1 + i * 0.2; SlashCmdList.GATHERLOG("add Iron Deposit") end
 local fresh = ns.db.nodes[14]
 ns.db.skipRecentMinutes = 10
 check(ns.IsFresh(fresh[1]), "a node gathered just now is fresh")
@@ -635,7 +635,7 @@ fresh[2].lastMined = time() - 3600; fresh[3].lastMined = time() - 3600
 P.x = 0.3
 ns.StartRoute(14, { fresh[1], fresh[2], fresh[3] })
 check(select(3, ns.GetRoute()) == 2, "a route starts past a stop gathered a moment ago")
-SlashCmdList.GATHERTRAIL("skip"); SlashCmdList.GATHERTRAIL("skip")
+SlashCmdList.GATHERLOG("skip"); SlashCmdList.GATHERLOG("skip")
 check(select(3, ns.GetRoute()) == 2, "going round the loop passes the fresh stop by")
 ns.db.skipRecentMinutes = 0
 check(not ns.IsFresh(fresh[1]), "skipping can be turned off")
@@ -649,7 +649,7 @@ ns.StopRoute()
 
 -- 5. skinning score ----------------------------------------------------------
 ON_TAXI = true; P.map, P.x, P.y = 15, 0.5, 0.5; tick(); ON_TAXI = false
-SlashCmdList.GATHERTRAIL("add skin Rugged Leather")
+SlashCmdList.GATHERLOG("add skin Rugged Leather")
 local camp = ns.db.nodes[15][1]
 local function campScore() for _, z in ipairs(ns.RankZones({}, "skin")) do if z.mapID == 15 then return z.score end end end
 camp.count = 3; local few = campScore()
@@ -658,7 +658,8 @@ check(many > few * 3, ("a camp with 50 skins outranks one with 3 (%.1f against %
 
 -- 6. data management ---------------------------------------------------------
 local text, records = ns.ExportData()
-check(text:sub(1, 12) == "GatherTrail1" and records > 30, "export produces " .. records .. " records")
+check(text:sub(1, 10) == "GatherLog1" and records > 30, "export produces " .. records .. " records")
+check(ns.ImportData("GatherTrail1") ~= nil and ns.ImportData("SomethingElse1") == nil, "text exported under the old name GatherTrail still imports")
 local function snapshot()
     local nodes, visits = 0, 0
     for _, list in pairs(ns.db.nodes) do
@@ -689,7 +690,7 @@ local function ShownNodePins()
     end
     return count
 end
-SlashCmdList.GATHERTRAIL("stop")
+SlashCmdList.GATHERLOG("stop")
 if ns.db.hidePins then ns.SetPinsHidden(false) end   -- the click-everything test above pressed Hide pins
 P.map, P.x, P.y = 1, 0.5, 0.5
 WorldMapFrame.__shown = true; ns.RefreshPins(); ns.RefreshMinimapPins()
@@ -700,18 +701,18 @@ mb.__scripts.OnClick(mb, "RightButton")
 check(ns.db.hidePins and ShownNodePins() == 0, "right-click on the minimap button hides every pin on both maps")
 check(ns.db.showKinds.herb == kindsBefore and ns.db.showPins == mapsBefore, "without changing the per-map or per-kind settings")
 mb.__scripts.OnEnter(mb)
-SlashCmdList.GATHERTRAIL("route")
+SlashCmdList.GATHERLOG("route")
 WorldMapFrame.__shown = true; ns.RefreshPins(); ns.RefreshMinimapPins()
 local _, hiddenRoute = ns.GetRoute()
 check(hiddenRoute and ShownNodePins() > 0, "a route being followed still shows its stops while pins are hidden")
-SlashCmdList.GATHERTRAIL("stop")
+SlashCmdList.GATHERLOG("stop")
 ns.RefreshPins(); ns.RefreshMinimapPins()
 check(ShownNodePins() == 0, "and they go again when the route stops")
-SlashCmdList.GATHERTRAIL("hide")
-check(not ns.db.hidePins and ShownNodePins() == shownBefore, "/gt hide brings back exactly the pins there were")
-GatherTrail_TogglePins()
+SlashCmdList.GATHERLOG("hide")
+check(not ns.db.hidePins and ShownNodePins() == shownBefore, "/glog hide brings back exactly the pins there were")
+GatherLog_TogglePins()
 check(ns.db.hidePins, "the key binding hides them")
-if not GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end
+if not GatherLogWindow:IsShown() then SlashCmdList.GATHERLOG("") end
 local pinsButton
 for _, f in ipairs(Frames()) do
     local label = rawget(f, "label")
@@ -720,7 +721,7 @@ end
 check(pinsButton and pinsButton.label.__text == "Show pins", "the window's header button says Show pins while they are hidden")
 pinsButton.__scripts.OnClick(pinsButton, "LeftButton")
 check(not ns.db.hidePins and pinsButton.label.__text == "Hide pins" and ShownNodePins() == shownBefore, "and one click on it shows them again")
-SlashCmdList.GATHERTRAIL("")
+SlashCmdList.GATHERLOG("")
 WorldMapFrame.__shown = false
 
 -- pins only for this character's professions -----------------------------------
@@ -728,7 +729,7 @@ ON_TAXI = true; P.map, P.x, P.y = 41, 0.5, 0.5; tick(); ON_TAXI = false
 NOW = NOW + 100
 for kind, name in pairs({ ore = "Copper Vein", herb = "Peacebloom", fish = "Floating Wreckage", skin = "Light Leather", chest = "Battered Chest" }) do
     P.x = P.x + 0.05
-    SlashCmdList.GATHERTRAIL("add " .. kind .. " " .. name)
+    SlashCmdList.GATHERLOG("add " .. kind .. " " .. name)
 end
 P.x = 0.5
 local function ShownKinds()
@@ -745,7 +746,7 @@ Redraw()
 local all = ShownKinds()
 check(all.ore and all.herb and all.fish and all.skin and all.chest, "with the limit off every kind has pins")
 SKILLS = {}
-SlashCmdList.GATHERTRAIL("mine")
+SlashCmdList.GATHERLOG("mine")
 Redraw()
 local none = ShownKinds()
 check(ns.db.onlyMyProfessions and not none.ore and not none.herb and not none.fish and not none.skin,
@@ -770,20 +771,20 @@ check(ShownKinds().ore, "a miner on the account sees it")
 SKILLS[186] = nil
 -- a route still shows its stops
 SKILLS = {}
-SlashCmdList.GATHERTRAIL("route")
+SlashCmdList.GATHERLOG("route")
 Redraw()
 check(ShownKinds().ore, "the stops of a route being followed are shown even without the profession")
-SlashCmdList.GATHERTRAIL("stop")
-SlashCmdList.GATHERTRAIL("mine")
+SlashCmdList.GATHERLOG("stop")
+SlashCmdList.GATHERLOG("mine")
 Redraw()
-check(not ns.db.onlyMyProfessions and ShownKinds().ore, "/gt mine turns the limit off again")
+check(not ns.db.onlyMyProfessions and ShownKinds().ore, "/glog mine turns the limit off again")
 WorldMapFrame.__shown = false
 SKILLS = {}
 
 -- 3. options page ------------------------------------------------------------
-if not GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end
+if not GatherLogWindow:IsShown() then SlashCmdList.GATHERLOG("") end
 local toggles = 0
-ns.ToggleSettings(GatherTrailWindow, 41)
+ns.ToggleSettings(GatherLogWindow, 41)
 for _, f in ipairs(Frames()) do
     if rawget(f, "Refresh") and f.__scripts.OnClick and not rawget(f, "items") then
         f.__scripts.OnClick(f, "LeftButton"); f.__scripts.OnClick(f, "LeftButton"); toggles = toggles + 1
@@ -800,8 +801,8 @@ for _, f in ipairs(Frames()) do
     end
 end
 check(pressed >= 6, "options and data buttons run without error (" .. pressed .. ")")
-ns.ToggleSettings(GatherTrailWindow, 41)
-if GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end
+ns.ToggleSettings(GatherLogWindow, 41)
+if GatherLogWindow:IsShown() then SlashCmdList.GATHERLOG("") end
 ns.db.skipRecentMinutes = 10
 
 -- zone level ranges -------------------------------------------------------
@@ -827,11 +828,11 @@ for i = 15, 30 do see("Wolf " .. i, 12 + i % 5) end
 see("Stray Elite", 40, { class = "elite" })
 lo, hi, source = ns.GetZoneLevels(2521)
 check(lo == 12 and hi == 16 and source == "seen", ("enough creatures give a range, and one stray does not stretch it (%s-%s)"):format(tostring(lo), tostring(hi)))
-SlashCmdList.GATHERTRAIL("add Copper Vein")
+SlashCmdList.GATHERLOG("add Copper Vein")
 local learned
 for _, z in ipairs(ns.RankZones({}, "ore")) do if z.mapID == 2521 then learned = z end end
 check(learned and learned.minLevel == 12 and learned.levelSource == "seen" and not learned.tooHigh, "the ranking uses the learned range")
-SlashCmdList.GATHERTRAIL("zone")
+SlashCmdList.GATHERLOG("zone")
 local exported = ns.ExportData()
 ns.db.zones[2521].mobLevels = nil
 ns.ImportData(exported)
@@ -912,7 +913,7 @@ Fire("PLAYER_SOFT_INTERACT_CHANGED", "GameObject-0-9", "")
 check(#ns.db.nodes[31] == 5, "the highlight going away records nothing")
 
 -- the window's profession tabs
-if not GatherTrailWindow:IsShown() then SlashCmdList.GATHERTRAIL("") end
+if not GatherLogWindow:IsShown() then SlashCmdList.GATHERLOG("") end
 local tabClicks = 0
 for _, f in ipairs(Frames()) do
     if rawget(f, "selected") and not rawget(f, "item") and f.__scripts.OnClick and f.__shown then
@@ -920,6 +921,6 @@ for _, f in ipairs(Frames()) do
     end
 end
 check(tabClicks == 6, "all six tabs switch without error")
-SlashCmdList.GATHERTRAIL("")
+SlashCmdList.GATHERLOG("")
 
 io.write("--- chat output sample ---\n"); for i = 1, math.min(8, #PRINTED) do io.write("  ", PRINTED[i], "\n") end
