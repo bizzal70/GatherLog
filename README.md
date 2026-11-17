@@ -19,7 +19,7 @@ Every character on your account adds to the same history, including characters t
 
 ## Using it
 
-Click the pickaxe button on the minimap, or type `/glog`.
+Click the pickaxe button on the minimap, or type `/glog` (or `/gatherlog`).
 
 1. Pick a tab (Ore, Herbs, Fish, Skins, Chests, Rares) and, if you like, one or more types in the list.
 2. The right side ranks the zones you have records in. Hover a zone to see how its score was reached.
