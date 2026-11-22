@@ -1,5 +1,9 @@
 # GatherLog
 
+## 0.21.3
+
+- **Controller:** when a fight starts, B goes straight back to its usual job, even with a GatherLog window open (it used to stay on closing the window until the fight ended). It closes the window again once the fight is over.
+
 ## 0.21.2
 
 - **Controller:** the B button now closes GatherLog's windows, like the X and Escape. While one is open, B closes it; once it is closed, B does whatever you have it set to again.
