@@ -83,6 +83,10 @@ If one of these does not work for you, `/glog debug` prints what the game report
 
 Everything is saved on your own computer, in the game's saved-settings folder, as `GatherLog.lua`. Nothing is sent anywhere.
 
+## Controller
+
+With a game controller, the **B** button closes the GatherLog window and its data dialog, like the X and Escape do. While a window is open, B closes it; once it is closed, B goes back to whatever you have it set to. (In combat the game does not let addons change a button, so B goes back to normal when the fight ends.)
+
 ## More from this author
 
 Other small addons for World of Warcraft: Forever, all free:

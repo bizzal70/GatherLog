@@ -73,3 +73,7 @@ Everything below, unless marked verified, comes from community sources during th
 - https://warcraft.wiki.gg/wiki/Patch_12.0.0/API_changes
 - https://github.com/Thunderz96/forever-addon-kit (MIT; captured API baseline in `data/forever_api.json`)
 - World sightings (0.18.0): tooltip hovers and the interact highlight (`PLAYER_SOFT_INTERACT_CHANGED`, name from `UnitName("softinteract")` when `UnitGUID` starts with `GameObject`) both go through `Sight` in `Collector.lua`, filtered by `ns.NotedRecently` at the player's position. A skill error falls back to the highlighted object when no tooltip is up. The interact highlight is unverified in game; `/glog debug` prints `interact highlight: ...` when it fires.
+
+## Controller B closes windows (2026-11-22)
+
+- `ns.CloseWithPadB(window, name)` in PadClose.lua (first in the TOC): every window listed in `UISpecialFrames` also calls it. While the window is shown, `SetOverrideBinding(window, true, "PAD2", "CLICK <name>PadClose:LeftButton")` points the controller's B at an invisible, mouse-disabled button that hides it; `ClearOverrideBindings(window)` on hide. Bindings cannot change in combat, so a change then waits for PLAYER_REGEN_ENABLED. Any new window: add it to UISpecialFrames and call `ns.CloseWithPadB` right after. Not yet confirmed in game.
