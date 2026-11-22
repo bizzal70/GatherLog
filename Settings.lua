@@ -34,6 +34,7 @@ local function CreateDialog()
     UI.Outline(dialog, UI.ACCENT[1], UI.ACCENT[2], UI.ACCENT[3], 0.6)
     tinsert(UISpecialFrames, "GatherLogDataDialog")
 
+    ns.CloseWithPadB(_G["GatherLogDataDialog"], "GatherLogDataDialog")
     dialog.title = UI.Label(dialog, "GameFontNormalLarge")
     dialog.title:SetPoint("TOPLEFT", 14, -12)
 

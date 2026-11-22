@@ -2,12 +2,13 @@
 ## Title: GatherLog
 ## Notes: Records the ore, herbs, fishing pools, skinning spots, treasure chests and rare creatures your characters find, ranks the best places to gather each, and routes you there. Type /glog.
 ## Author: bizzal70
-## Version: 0.21.1
+## Version: 0.21.2
 ## X-Curse-Project-ID: 1790426
 ## SavedVariables: GatherLogDB
 ## IconTexture: Interface\Icons\Trade_Mining
 ## AddonCompartmentFunc: GatherLog_OnAddonCompartmentClick
 
+PadClose.lua
 Registry.lua
 Core.lua
 Route.lua

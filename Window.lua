@@ -478,6 +478,7 @@ local function CreateWindow()
     -- Lets Escape close the window.
     tinsert(UISpecialFrames, "GatherLogWindow")
 
+    ns.CloseWithPadB(_G["GatherLogWindow"], "GatherLogWindow")
     -- A soft dark rim outside the border, standing in for a drop shadow.
     local shadow = CreateFrame("Frame", nil, window)
     shadow:SetPoint("TOPLEFT", -3, 3)
