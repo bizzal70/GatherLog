@@ -1,0 +1,5 @@
+<Bindings>
+    <Binding name="GATHERLOG_TOGGLEPINS" header="GATHERLOG" category="ADDONS">
+        GatherLog_TogglePins()
+    </Binding>
+</Bindings>
