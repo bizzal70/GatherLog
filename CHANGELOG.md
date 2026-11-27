@@ -1,5 +1,9 @@
 # GatherLog
 
+## 0.21.4
+
+- A herb or other node you couldn't gather (too low a skill, say) was noted as "(not mined)" whatever it was. It now says "(not gathered)", for every kind of node.
+
 ## 0.21.3
 
 - **Controller:** when a fight starts, B goes straight back to its usual job, even with a GatherLog window open (it used to stay on closing the window until the fight ended). It closes the window again once the fight is over.

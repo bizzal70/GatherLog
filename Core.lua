@@ -384,7 +384,7 @@ function ns.RecordNode(name, kind, approx, profession, offset)
                     approx and " (approximate location)" or ""))
             end
         elseif kind == "failed" then
-            ns.Print(("Noted %s in %s (not mined)."):format(name, ns.MapName(mapID)))
+            ns.Print(("Noted %s in %s (not gathered)."):format(name, ns.MapName(mapID)))
         elseif isNew then
             ns.Print(("New node: %s in %s (%d known here)."):format(name, ns.MapName(mapID), #nodes))
         else
